@@ -1,0 +1,213 @@
+"""PBX path objects"""
+
+import os
+from typing import cast, List, Optional
+
+import deserialize
+
+from .pbxobject import PBXObject
+
+# pylint: disable=no-member
+
+
+class MultipleParentException(Exception):
+    """Thrown when an item has multiple parents and we try and get them."""
+
+
+@deserialize.key("source_tree", "sourceTree")
+@deserialize.downcast_identifier(PBXObject, "PBXPathObject")
+class PBXPathObject(PBXObject):
+    """Represents an object with a path (i.e. file or group)."""
+
+    path: Optional[str]
+    source_tree: str
+
+    _full_path: Optional[str]
+
+    def _find_groups_containing(self, reference: str) -> List["PBXGroup"]:
+        """Find groups containing the reference.
+
+        :param reference: The reference to search for
+
+        :returns: A list of group IDs containing the reference
+        """
+
+        matching = {}
+
+        for group in self.project().fetch_type(PBXGroup).values():
+            if reference in group.children:
+                matching[group.object_key] = group
+
+        for group in self.project().fetch_type(PBXVariantGroup).values():
+            if reference in group.children:
+                matching[group.object_key] = group
+
+        for group in self.project().fetch_type(XCVersionGroup).values():
+            if reference in group.children:
+                matching[group.object_key] = group
+
+        return list(matching.values())
+
+    def parent_group(self) -> Optional["PBXGroup"]:
+        """Find the parent group of a reference.
+
+        :raises MultipleParentException: If a group has more than 1 parent group
+
+        :returns: The parent group if found, None otherwise
+        """
+
+        parent_groups = self._find_groups_containing(self.object_key)
+
+        if len(parent_groups) > 1:
+            raise MultipleParentException("Found multi use identifier")
+
+        if len(parent_groups) == 0:
+            return None
+
+        return parent_groups[0]
+
+    def relative_path(self) -> Optional[str]:
+        """Get the relative path for the group to the source root
+
+        This works by getting the current references path, then searching up the
+        tree, constructing the path as we go, until the root object is found.
+
+        NOTE: This may contain a variable such as `$(BUILT_PRODUCTS_DIR)`
+
+        :raises Exception: If an unexpected source tree is found
+
+        :returns: The path if found, None otherwise
+        """
+
+        # pylint: disable=too-many-return-statements
+
+        if hasattr(self, "_relative_path"):
+            cached_path = getattr(self, "_relative_path")
+            if cached_path is not None:
+                return cast(str, cached_path)
+
+        if self.source_tree == "SOURCE_ROOT":
+            setattr(self, "_relative_path", self.path)
+            return cast(str, self.path)
+
+        if self.source_tree != "<group>":
+            if self.source_tree in ["BUILT_PRODUCTS_DIR", "SDKROOT", "DEVELOPER_DIR"]:
+                return f"$({self.source_tree})"
+            raise Exception(f"Unexpected source tree: {self.source_tree}")
+
+        parent = self.parent_group()
+
+        if not parent:
+            return None
+
+        parent_path = parent.relative_path()
+
+        if self.path is None:
+            setattr(self, "_relative_path", parent_path)
+            return parent_path
+
+        if parent_path is None:
+            setattr(self, "_relative_path", self.path)
+            return self.path
+
+        value = os.path.join(parent_path, self.path)
+        setattr(self, "_relative_path", value)
+
+        return value
+
+        # pylint: enable=too-many-return-statements
+
+    def absolute_path(self) -> Optional[str]:
+        """Find the absolute path
+
+        :returns: The absolute path of the object
+        """
+
+        path = self.relative_path()
+
+        if path is None:
+            return None
+
+        return os.path.join(self.project().source_root, path)
+
+
+@deserialize.key("indent_width", "indentWidth")
+@deserialize.key("tab_width", "tabWidth")
+@deserialize.ignore("_path")
+@deserialize.parser("indentWidth", lambda x: int(x) if x else None)
+@deserialize.parser("tabWidth", lambda x: int(x) if x else None)
+@deserialize.downcast_identifier(PBXObject, "PBXGroup")
+class PBXGroup(PBXPathObject):
+    """Represents a PBXGroup.
+
+    This is a group in the Xcode file explorer.
+    """
+
+    children: List[str]
+    indent_width: Optional[int]
+    tab_width: Optional[int]
+    name: Optional[str]
+
+
+@deserialize.downcast_identifier(PBXObject, "PBXVariantGroup")
+class PBXVariantGroup(PBXGroup):
+    """Represents a PBXVariantGroup.
+
+    These are similar to groups but are not backed by a folder on disk. This may
+    be a deliberate choice, or it may be used to represent something like a
+    .strings file, where the "file" can be expanded to see each language.
+    """
+
+    name: str
+
+
+@deserialize.key("file_encoding", "fileEncoding")
+@deserialize.key("last_known_file_type", "lastKnownFileType")
+@deserialize.key("line_ending", "lineEnding")
+@deserialize.key("indent_width", "indentWidth")
+@deserialize.key("tab_width", "tabWidth")
+@deserialize.key("xc_language_specification_identifier", "xcLanguageSpecificationIdentifier")
+@deserialize.key("explicit_file_type", "explicitFileType")
+@deserialize.key("include_in_index", "includeInIndex")
+@deserialize.parser("fileEncoding", lambda x: int(x) if x else None)
+@deserialize.downcast_identifier(PBXObject, "PBXFileReference")
+class PBXFileReference(PBXPathObject):
+    """Represents a PBXFileReference.
+
+    The details of a particular file.
+    """
+
+    file_encoding: Optional[int]
+    last_known_file_type: Optional[str]
+    line_ending: Optional[str]
+    indent_width: Optional[str]
+    tab_width: Optional[str]
+    name: Optional[str]
+    xc_language_specification_identifier: Optional[str]
+    explicit_file_type: Optional[str]
+    include_in_index: Optional[str]
+
+    def is_code_file(self) -> bool:
+        """Check if this reference is a code file or not.
+
+        :returns: True if it is a code file, False otherwise
+        """
+        # pylint: disable=no-member
+        if self.path is None:
+            return False
+        extension = self.path.split(".")[-1]
+        # pylint: enable=no-member
+        return extension in ["swift", "m"]
+
+
+@deserialize.auto_snake()
+@deserialize.downcast_identifier(PBXObject, "XCVersionGroup")
+class XCVersionGroup(PBXPathObject):
+    """Represents an XCVersion group
+
+    These groups have versioned files in them
+    """
+
+    children: List[str]
+    current_version: str
+    version_group_type: str
