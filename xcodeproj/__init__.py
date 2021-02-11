@@ -30,6 +30,7 @@ from .buildphases import (
     PBXShellScriptBuildPhase,
     PBXSourcesBuildPhase,
 )
+from .buildrules import PBXBuildRule
 from .files import PBXBuildFile
 from .pathobjects import (
     PBXPathObject,
@@ -162,19 +163,6 @@ class XcodeProject:
                 return target
         return None
 
-    def generate_code_file_paths(self) -> Iterator[str]:
-        """Find files."""
-
-        for file_reference in self.fetch_type(PBXFileReference).values():
-
-            if not file_reference.is_code_file():
-                continue
-
-            path = file_reference.relative_path()
-            assert path is not None
-
-            yield os.path.join(self.source_root, path)
-
     def target_containing_phase(self, source_build_phase_ref: str) -> Optional[PBXNativeTarget]:
         """Find the target containing the Source Build Phase
         :param source_build_phase_ref: The reference of the parent
@@ -182,7 +170,7 @@ class XcodeProject:
         :returns: The target containing the source build phase
         """
         for native_target in self.fetch_type(PBXNativeTarget).values():
-            for build_phase in native_target.build_phases():
+            for build_phase in native_target.build_phases:
                 if build_phase.object_key == source_build_phase_ref:
                     return native_target
         return None
@@ -201,6 +189,6 @@ class XcodeProject:
             if native_target_name != native_target.name:
                 continue
 
-            return self.fetch_type(XCConfigurationList)[native_target.build_configuration_list]
+            return native_target.build_configuration_list
 
         return None

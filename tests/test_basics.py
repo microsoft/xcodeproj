@@ -43,9 +43,9 @@ def test_base_references(one: xcodeproj.XcodeProject) -> None:
     :param one: The project
     """
 
-    for target in one.project.targets():
-        for build_phase in target.build_phases():
-            for build_file in build_phase.files():
+    for target in one.project.targets:
+        for build_phase in target.build_phases:
+            for build_file in build_phase.files:
                 assert build_file is not None
 
 
@@ -186,46 +186,12 @@ def test_build_configuration(one: xcodeproj.XcodeProject) -> None:
 
     list1 = one.build_configuration_list_for_target("CLJTest")
     assert list1 is not None
-    assert sorted(list1.build_configurations) == sorted(
+    assert sorted(list1.build_configuration_ids) == sorted(
         ["DD74C33B25AF302C00C4A922", "DD74C33C25AF302C00C4A922"]
     )
 
     list2 = one.build_configuration_list_for_target("hodor")
     assert list2 is None
-
-
-def test_code_file_paths(one: xcodeproj.XcodeProject) -> None:
-    """Test that code files are found (.swift and .m)
-
-    :param one: The project
-    """
-
-    expected_code_files = [
-        "wat WatchKit Extension/ComplicationController.swift",
-        "wat WatchKit Extension/InterfaceController.swift",
-        "CLJTest/SceneDelegate.swift",
-        "wat WatchKit Extension/NotificationController.swift",
-        "CLJTest/AppDelegate.swift",
-        "CLJTest/test.m",
-        "CLJTest/ViewController.swift",
-        "wat WatchKit Extension/ExtensionDelegate.swift",
-    ]
-
-    for index, item in enumerate(one.generate_code_file_paths()):
-        assert item == os.path.join(COLLATERAL_PATH, expected_code_files[index])
-
-
-def test_code_files(two: xcodeproj.XcodeProject) -> None:
-    """Test that code files are found (.swift and .m)
-
-    :param two: The project
-    """
-
-    for item in two.fetch_type(xcodeproj.PBXFileReference).values():
-        is_code_file = item.is_code_file()
-        if item.path is None:
-            continue
-        assert is_code_file == item.path.endswith(".swift") or item.path.endswith(".m")
 
 
 def test_build_file_references(two: xcodeproj.XcodeProject) -> None:

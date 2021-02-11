@@ -20,6 +20,7 @@ class PBXBuildPhase(PBXObject):
     build_action_mask: str
     run_only_for_deployment_post_processing: bool
 
+    @property
     def files(self) -> Iterator[PBXBuildFile]:
         """Get the files in the build phase."""
         for file_id in self.file_ids:

@@ -133,6 +133,7 @@ class PBXPathObject(PBXObject):
 
 @deserialize.key("indent_width", "indentWidth")
 @deserialize.key("tab_width", "tabWidth")
+@deserialize.key("children_ids", "children")
 @deserialize.ignore("_path")
 @deserialize.parser("indentWidth", lambda x: int(x) if x else None)
 @deserialize.parser("tabWidth", lambda x: int(x) if x else None)
@@ -143,10 +144,17 @@ class PBXGroup(PBXPathObject):
     This is a group in the Xcode file explorer.
     """
 
-    children: List[str]
+    children_ids: List[str]
     indent_width: Optional[int]
     tab_width: Optional[int]
     name: Optional[str]
+
+    def children(self) -> List[PBXPathObject]:
+        """Get all the children for this group.
+
+        :returns: The children for this group
+        """
+        return [cast(PBXPathObject, self.objects()[child_id]) for child_id in self.children_ids]
 
 
 @deserialize.downcast_identifier(PBXObject, "PBXVariantGroup")
@@ -187,20 +195,9 @@ class PBXFileReference(PBXPathObject):
     explicit_file_type: Optional[str]
     include_in_index: Optional[str]
 
-    def is_code_file(self) -> bool:
-        """Check if this reference is a code file or not.
-
-        :returns: True if it is a code file, False otherwise
-        """
-        # pylint: disable=no-member
-        if self.path is None:
-            return False
-        extension = self.path.split(".")[-1]
-        # pylint: enable=no-member
-        return extension in ["swift", "m"]
-
 
 @deserialize.auto_snake()
+@deserialize.key("child_ids", "children")
 @deserialize.downcast_identifier(PBXObject, "XCVersionGroup")
 class XCVersionGroup(PBXPathObject):
     """Represents an XCVersion group
@@ -208,6 +205,13 @@ class XCVersionGroup(PBXPathObject):
     These groups have versioned files in them
     """
 
-    children: List[str]
+    child_ids: List[str]
     current_version: str
     version_group_type: str
+
+    def children(self) -> List[PBXPathObject]:
+        """Get all the children for this group.
+
+        :returns: The children for this group
+        """
+        return [cast(PBXPathObject, self.objects()[child_id]) for child_id in self.child_ids]

@@ -1,13 +1,13 @@
 """PBX object types"""
 
-from typing import Any, Dict, List, Optional
+from typing import Any, cast, Dict, List, Optional
 
 import deserialize
 
 from .pbxobject import PBXObject
 
 
-@deserialize.key("build_configurations", "buildConfigurations")
+@deserialize.key("build_configuration_ids", "buildConfigurations")
 @deserialize.key("default_configuration_is_visible", "defaultConfigurationIsVisible")
 @deserialize.key("default_configuration_name", "defaultConfigurationName")
 @deserialize.parser("defaultConfigurationIsVisible", lambda x: {"0": False, "1": True}[x])
@@ -18,13 +18,22 @@ class XCConfigurationList(PBXObject):
     This is a list of build configurations. Usually associated with a target.
     """
 
-    build_configurations: List[str]
+    build_configuration_ids: List[str]
     default_configuration_is_visible: bool
     default_configuration_name: str
 
+    def build_configurations(self) -> List[XCBuildConfiguration]:
+        """Get all the build configurations for this list.
 
-@deserialize.key("base_configuration_reference", "baseConfigurationReference")
-@deserialize.key("build_configuration_reference", "buildConfigurationReference")
+        :returns: The build configurations
+        """
+        return [
+            cast(XCBuildConfiguration, self.objects()[build_configuration_id])
+            for build_configuration_id in self.build_configuration_ids
+        ]
+
+
+@deserialize.key("base_configuration_reference_id", "baseConfigurationReference")
 @deserialize.key("build_settings", "buildSettings")
 @deserialize.downcast_identifier(PBXObject, "XCBuildConfiguration")
 class XCBuildConfiguration(PBXObject):
@@ -35,6 +44,16 @@ class XCBuildConfiguration(PBXObject):
     """
 
     base_configuration_reference: Optional[str]
-    build_configuration_reference: Optional[str]
     build_settings: Dict[str, Any]
     name: str
+
+    def base_configuration(self) -> Optional[XCBuildConfiguration]:
+        """Get the base configuration for this build configureation.
+
+        :returns: The base configuration
+        """
+
+        if not self.base_configuration_reference:
+            return None
+
+        return cast(XCBuildConfiguration, self.objects()[self.base_configuration_reference])

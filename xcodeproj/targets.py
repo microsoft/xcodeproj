@@ -7,6 +7,9 @@ import deserialize
 
 from .pbxobject import PBXObject
 from .buildphases import PBXBuildPhase
+from .buildrules import PBXBuildRule
+from .pathobjects import PBXFileReference
+from .xcobjects import XCConfigurationList
 
 
 class PBXProductType(enum.Enum):
@@ -28,20 +31,34 @@ class PBXProductType(enum.Enum):
 
 
 @deserialize.key("build_phases_ids", "buildPhases")
+@deserialize.key("build_configuration_list_id", "buildConfigurationList")
+@deserialize.key("dependency_ids", "dependencies")
 @deserialize.auto_snake()
 class PBXTarget(PBXObject):
-    """Represents a PBXAggregateTarget."""
+    """Represents a PBXTarget."""
 
-    build_configuration_list: str
+    build_configuration_list_id: str
     build_phases_ids: List[str]
-    dependencies: List[str]
+    dependency_ids: List[str]
     name: str
     product_name: Optional[str]
 
+    @property
     def build_phases(self) -> Iterator[PBXBuildPhase]:
         """Get the build phases in the target."""
         for phase_id in self.build_phases_ids:
             yield cast(PBXBuildPhase, self.objects()[phase_id])
+
+    @property
+    def build_configuration_list(self) -> XCConfigurationList:
+        """Get the build configuration list for the target."""
+        return cast(XCConfigurationList, self.objects()[self.build_configuration_list_id])
+
+    @property
+    def dependencies(self) -> Iterator[PBXTarget]:
+        """Get the dependencies of the target."""
+        for dependency_id in self.dependency_ids:
+            yield cast(PBXTarget, self.objects()[dependency_id])
 
 
 @deserialize.downcast_identifier(PBXObject, "PBXAggregateTarget")
@@ -50,6 +67,8 @@ class PBXAggregateTarget(PBXTarget):
 
 
 @deserialize.auto_snake()
+@deserialize.key("product_reference_id", "productReference")
+@deserialize.key("build_rule_ids", "buildRules")
 @deserialize.downcast_identifier(PBXObject, "PBXNativeTarget")
 class PBXNativeTarget(PBXTarget):
     """Represents a PBXNativeTarget.
@@ -57,6 +76,21 @@ class PBXNativeTarget(PBXTarget):
     This is the corresponding target type to an aggregate target.
     """
 
-    build_rules: Optional[List[str]]
-    product_reference: str
+    build_rule_ids: Optional[List[str]]
+    product_reference_id: Optional[str]
     product_type: PBXProductType
+
+    @property
+    def product_reference(self) -> Optional[PBXFileReference]:
+        """Get the product reference of the target."""
+        if self.product_reference_id is None:
+            return None
+        return cast(PBXFileReference, self.objects()[self.product_reference_id])
+
+    @property
+    def build_rules(self) -> Iterator[PBXBuildRule]:
+        """Get the product reference of the target."""
+        if self.build_rule_ids is None:
+            return
+        for build_rule_id in self.build_rule_ids:
+            yield cast(PBXBuildRule, self.objects()[build_rule_id])
