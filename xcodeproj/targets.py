@@ -55,7 +55,7 @@ class PBXTarget(PBXObject):
         return cast(XCConfigurationList, self.objects()[self.build_configuration_list_id])
 
     @property
-    def dependencies(self) -> Iterator[PBXTarget]:
+    def dependencies(self) -> Iterator["PBXTarget"]:
         """Get the dependencies of the target."""
         for dependency_id in self.dependency_ids:
             yield cast(PBXTarget, self.objects()[dependency_id])
