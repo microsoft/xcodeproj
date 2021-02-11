@@ -21,6 +21,7 @@ class XCBuildConfiguration(PBXObject):
     build_settings: Dict[str, Any]
     name: str
 
+    @property
     def base_configuration(self) -> Optional["XCBuildConfiguration"]:
         """Get the base configuration for this build configureation.
 
@@ -48,6 +49,7 @@ class XCConfigurationList(PBXObject):
     default_configuration_is_visible: bool
     default_configuration_name: str
 
+    @property
     def build_configurations(self) -> List[XCBuildConfiguration]:
         """Get all the build configurations for this list.
 

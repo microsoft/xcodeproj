@@ -149,6 +149,7 @@ class PBXGroup(PBXPathObject):
     tab_width: Optional[int]
     name: Optional[str]
 
+    @property
     def children(self) -> List[PBXPathObject]:
         """Get all the children for this group.
 
@@ -209,6 +210,7 @@ class XCVersionGroup(PBXPathObject):
     current_version: str
     version_group_type: str
 
+    @property
     def children(self) -> List[PBXPathObject]:
         """Get all the children for this group.
 
