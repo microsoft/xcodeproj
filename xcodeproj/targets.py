@@ -1,7 +1,7 @@
 """PBX object types"""
 
 import enum
-from typing import cast, Iterator, List, Optional
+from typing import cast, List, Optional
 
 import deserialize
 
@@ -44,10 +44,9 @@ class PBXTarget(PBXObject):
     product_name: Optional[str]
 
     @property
-    def build_phases(self) -> Iterator[PBXBuildPhase]:
+    def build_phases(self) -> List[PBXBuildPhase]:
         """Get the build phases in the target."""
-        for phase_id in self.build_phases_ids:
-            yield cast(PBXBuildPhase, self.objects()[phase_id])
+        return [cast(PBXBuildPhase, self.objects()[phase_id]) for phase_id in self.build_phases_ids]
 
     @property
     def build_configuration_list(self) -> XCConfigurationList:
@@ -55,10 +54,11 @@ class PBXTarget(PBXObject):
         return cast(XCConfigurationList, self.objects()[self.build_configuration_list_id])
 
     @property
-    def dependencies(self) -> Iterator["PBXTarget"]:
+    def dependencies(self) -> List["PBXTarget"]:
         """Get the dependencies of the target."""
-        for dependency_id in self.dependency_ids:
-            yield cast(PBXTarget, self.objects()[dependency_id])
+        return [
+            cast(PBXTarget, self.objects()[dependency_id]) for dependency_id in self.dependency_ids
+        ]
 
 
 @deserialize.downcast_identifier(PBXObject, "PBXAggregateTarget")
@@ -88,9 +88,12 @@ class PBXNativeTarget(PBXTarget):
         return cast(PBXFileReference, self.objects()[self.product_reference_id])
 
     @property
-    def build_rules(self) -> Iterator[PBXBuildRule]:
+    def build_rules(self) -> List[PBXBuildRule]:
         """Get the product reference of the target."""
         if self.build_rule_ids is None:
-            return
-        for build_rule_id in self.build_rule_ids:
-            yield cast(PBXBuildRule, self.objects()[build_rule_id])
+            return []
+
+        return [
+            cast(PBXBuildRule, self.objects()[build_rule_id])
+            for build_rule_id in self.build_rule_ids
+        ]

@@ -1,6 +1,6 @@
 """PBXProject object."""
 
-from typing import Any, cast, Dict, Iterator, List
+from typing import Any, cast, Dict, List
 
 import deserialize
 
@@ -35,10 +35,9 @@ class PBXProject(PBXObject):
     target_ids: List[str]
 
     @property
-    def targets(self) -> Iterator[PBXTarget]:
+    def targets(self) -> List[PBXTarget]:
         """Get the targets in the project."""
-        for target_id in self.target_ids:
-            yield cast(PBXTarget, self.objects()[target_id])
+        return [cast(PBXTarget, self.objects()[target_id]) for target_id in self.target_ids]
 
     @property
     def main_group(self) -> PBXGroup:

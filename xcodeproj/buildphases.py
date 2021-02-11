@@ -1,6 +1,6 @@
 """PBX build phases"""
 
-from typing import cast, Iterator, List, Optional
+from typing import cast, List, Optional
 
 import deserialize
 
@@ -21,10 +21,9 @@ class PBXBuildPhase(PBXObject):
     run_only_for_deployment_post_processing: bool
 
     @property
-    def files(self) -> Iterator[PBXBuildFile]:
+    def files(self) -> List[PBXBuildFile]:
         """Get the files in the build phase."""
-        for file_id in self.file_ids:
-            yield cast(PBXBuildFile, self.objects()[file_id])
+        return [cast(PBXBuildFile, self.objects()[file_id]) for file_id in self.file_ids]
 
 
 @deserialize.downcast_identifier(PBXObject, "PBXSourcesBuildPhase")
