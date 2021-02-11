@@ -35,3 +35,24 @@ class PBXObject:
         """
         reference = getattr(self, "project_ref")
         return reference()
+
+    def __eq__(self, other: object) -> bool:
+        """Determine if the supplied object is equal to self.
+
+        :param other: The object to compare to self
+
+        :returns: True if they are equal, False otherwise.
+        """
+
+        if not isinstance(other, type(self)):
+            return False
+
+        return self.object_key == other.object_key
+
+    def __hash__(self) -> int:
+        """Calculate the hash of the object
+
+        :returns: The hash value of the object
+        """
+
+        return hash(self.object_key)
