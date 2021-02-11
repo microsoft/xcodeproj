@@ -30,17 +30,13 @@ class XCBuildConfiguration(PBXObject):
         if not self.base_configuration_reference:
             return None
 
-        return cast(
-            XCBuildConfiguration, self.objects()[self.base_configuration_reference]
-        )
+        return cast(XCBuildConfiguration, self.objects()[self.base_configuration_reference])
 
 
 @deserialize.key("build_configuration_ids", "buildConfigurations")
 @deserialize.key("default_configuration_is_visible", "defaultConfigurationIsVisible")
 @deserialize.key("default_configuration_name", "defaultConfigurationName")
-@deserialize.parser(
-    "defaultConfigurationIsVisible", lambda x: {"0": False, "1": True}[x]
-)
+@deserialize.parser("defaultConfigurationIsVisible", lambda x: {"0": False, "1": True}[x])
 @deserialize.downcast_identifier(PBXObject, "XCConfigurationList")
 class XCConfigurationList(PBXObject):
     """Represents an XCConfigurationList.
