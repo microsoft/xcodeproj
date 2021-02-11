@@ -2,6 +2,53 @@
 
 `xcodeproj` is a utility for interacting with Xcode's xcodeproj bundle format.
 
+It expects some level of understanding of the internals of the pbxproj format and, in the future, schemes, etc. Note that this tool only reads projects. It does not write out any changes. If you are looking for more advanced functionality like this, I recommend looking at the Ruby gem of the same name (which is unaffiliated in anyway). 
+
+To learn more about the format, you can look at any of these locations:
+
+* <http://www.monobjc.net/xcode-project-file-format.html>
+* <https://www.rubydoc.info/gems/xcodeproj/Xcodeproj/Project>
+
+## Getting Started
+
+Loading a project is very simple:
+
+```python
+project = xcodeproj.XcodeProject("/path/to/project.xcodeproj")
+```
+
+From here you can explore the project in different ways:
+
+```python
+
+# Get all targets
+for target in project.targets:
+    print(target.name)
+
+# Print from the root level, 2 levels deep (.project is a property on the root 
+# project as in the future more surfaces, such as schemes, will be exposed)
+for item1 in project.project.main_group.children:
+    print(item1)
+    if not isinstance(item1, xcodeproj.PBXGroup):
+        continue
+
+    for item2 in item1.children:
+        print("\t", item2)
+
+# Check that all files referenced in the project exist on disk
+for item in project.fetch_type(xcodeproj.PBXFileReference).values():
+    assert os.path.exists(item.absolute_path())
+
+# You can access the raw objects map directly:
+obj = project.objects["key here"]
+
+# For any object you have, you can access its key/identifier via the 
+# `.object_key` property
+key = obj.object_key
+```
+
+Note: This library is "lazy". Many things aren't calculated until they are used. This time will be inconsequential on smaller projects, but on larger ones, it can save quite a bit of time due to not parsing the entire project on load. These properties are usually stored though so that subsequent accesses are instant.
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
