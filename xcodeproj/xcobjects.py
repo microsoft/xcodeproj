@@ -17,7 +17,7 @@ class XCBuildConfiguration(PBXObject):
     "Debug" or "Release".
     """
 
-    base_configuration_reference: Optional[str]
+    base_configuration_reference_id: Optional[str]
     build_settings: Dict[str, Any]
     name: str
 
@@ -27,10 +27,10 @@ class XCBuildConfiguration(PBXObject):
         :returns: The base configuration
         """
 
-        if not self.base_configuration_reference:
+        if not self.base_configuration_reference_id:
             return None
 
-        return cast(XCBuildConfiguration, self.objects()[self.base_configuration_reference])
+        return cast(XCBuildConfiguration, self.objects()[self.base_configuration_reference_id])
 
 
 @deserialize.key("build_configuration_ids", "buildConfigurations")
