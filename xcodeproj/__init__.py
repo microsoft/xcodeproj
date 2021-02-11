@@ -8,7 +8,6 @@ from typing import (
     Any,
     cast,
     Dict,
-    Iterator,
     List,
     MutableMapping,
     Optional,
@@ -38,7 +37,6 @@ from .pathobjects import (
     PBXVariantGroup,
     PBXFileReference,
     XCVersionGroup,
-    MultipleParentException,
 )
 from .pbxproject import PBXProject
 from .other import PBXTargetDependency, PBXContainerItemProxy

@@ -169,14 +169,6 @@ def test_get_parents(two: xcodeproj.XcodeProject) -> None:
     assert scene_delegate_parent is not None
     assert scene_delegate_parent.object_key == "DD74C32825AF302A00C4A922"
 
-    test_m = two.objects["DD62471D25AF30BE0081F68F"]
-    try:
-        _ = test_m.parent_group()
-    except xcodeproj.MultipleParentException:
-        pass
-    except Exception:
-        pytest.fail("Failed to get MultipleParentException")
-
 
 def test_build_configuration(one: xcodeproj.XcodeProject) -> None:
     """Test that build configuration works

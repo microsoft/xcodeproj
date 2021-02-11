@@ -10,10 +10,6 @@ from .pbxobject import PBXObject
 # pylint: disable=no-member
 
 
-class MultipleParentException(Exception):
-    """Thrown when an item has multiple parents and we try and get them."""
-
-
 @deserialize.key("source_tree", "sourceTree")
 @deserialize.downcast_identifier(PBXObject, "PBXPathObject")
 class PBXPathObject(PBXObject):
@@ -24,7 +20,7 @@ class PBXPathObject(PBXObject):
 
     _full_path: Optional[str]
 
-    def _find_groups_containing(self, reference: str) -> List["PBXGroup"]:
+    def _find_groups_containing(self) -> List["PBXGroup"]:
         """Find groups containing the reference.
 
         :param reference: The reference to search for
@@ -32,39 +28,28 @@ class PBXPathObject(PBXObject):
         :returns: A list of group IDs containing the reference
         """
 
-        matching = {}
-
-        for group in self.project().fetch_type(PBXGroup).values():
-            if reference in group.children:
-                matching[group.object_key] = group
-
-        for group in self.project().fetch_type(PBXVariantGroup).values():
-            if reference in group.children:
-                matching[group.object_key] = group
-
-        for group in self.project().fetch_type(XCVersionGroup).values():
-            if reference in group.children:
-                matching[group.object_key] = group
-
-        return list(matching.values())
-
     def parent_group(self) -> Optional["PBXGroup"]:
         """Find the parent group of a reference.
 
-        :raises MultipleParentException: If a group has more than 1 parent group
+        If a reference happens to be in multiple groups, only the first found
+        instance will be returned.
 
         :returns: The parent group if found, None otherwise
         """
 
-        parent_groups = self._find_groups_containing(self.object_key)
+        for group in self.project().fetch_type(PBXGroup).values():
+            if self in group.children:
+                return group
 
-        if len(parent_groups) > 1:
-            raise MultipleParentException("Found multi use identifier")
+        for group in self.project().fetch_type(PBXVariantGroup).values():
+            if self in group.children:
+                return group
 
-        if len(parent_groups) == 0:
-            return None
+        for group in self.project().fetch_type(XCVersionGroup).values():
+            if self in group.children:
+                return group
 
-        return parent_groups[0]
+        return None
 
     def relative_path(self) -> Optional[str]:
         """Get the relative path for the group to the source root
