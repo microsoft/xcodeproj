@@ -11,6 +11,7 @@ from .pbxobject import PBXObject
 
 
 @deserialize.key("source_tree", "sourceTree")
+@deserialize.ignore("_parent_group_reference")
 @deserialize.downcast_identifier(PBXObject, "PBXPathObject")
 class PBXPathObject(PBXObject):
     """Represents an object with a path (i.e. file or group)."""
@@ -18,15 +19,8 @@ class PBXPathObject(PBXObject):
     path: Optional[str]
     source_tree: str
 
+    _parent_group_reference: Optional[str]
     _full_path: Optional[str]
-
-    def _find_groups_containing(self) -> List["PBXGroup"]:
-        """Find groups containing the reference.
-
-        :param reference: The reference to search for
-
-        :returns: A list of group IDs containing the reference
-        """
 
     def parent_group(self) -> Optional["PBXGroup"]:
         """Find the parent group of a reference.
@@ -37,16 +31,25 @@ class PBXPathObject(PBXObject):
         :returns: The parent group if found, None otherwise
         """
 
+        if (
+            hasattr(self, "_parent_group_reference")
+            and getattr(self, "_parent_group_reference") is not None
+        ):
+            return cast(PBXGroup, self.project().objects[getattr(self, "_parent_group_reference")])
+
         for group in self.project().fetch_type(PBXGroup).values():
             if self in group.children:
+                setattr(self, "_parent_group_reference", group.object_key)
                 return group
 
         for group in self.project().fetch_type(PBXVariantGroup).values():
             if self in group.children:
+                setattr(self, "_parent_group_reference", group.object_key)
                 return group
 
         for group in self.project().fetch_type(XCVersionGroup).values():
             if self in group.children:
+                setattr(self, "_parent_group_reference", group.object_key)
                 return group
 
         return None
