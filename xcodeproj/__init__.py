@@ -162,12 +162,16 @@ class XcodeProject:
                 if subgroup.source_tree == "SOURCE_ROOT":
                     populate(subgroup, subgroup.path)
                 elif subgroup.source_tree == "<group>":
-                    if subgroup.path is not None and path is not None:
-                        populate(subgroup, os.path.join(path, subgroup.path))
-                    elif subgroup.path is not None and path is None:
-                        populate(subgroup, subgroup.path)
+                    if subgroup.path is None:
+                        if path is None:
+                            populate(subgroup, path)
+                        else:
+                            non_set.append(subgroup)
                     else:
-                        non_set.append(subgroup)
+                        if path is not None:
+                            populate(subgroup, os.path.join(path, subgroup.path))
+                        else:
+                            populate(subgroup, subgroup.path)
                 else:
                     non_set.append(subgroup)
 
