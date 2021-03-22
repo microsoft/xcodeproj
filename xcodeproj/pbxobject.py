@@ -20,6 +20,15 @@ class PBXObject:
     objects_ref: Callable[[], Dict[str, "PBXObject"]]
     project_ref: Callable[[], Any]
 
+    def __getstate__(self):
+        """Return state values to be pickled."""
+        new_dict = {}
+        for key, value in self.__dict__.items():
+            if key in ["objects_ref", "project_ref"]:
+                continue
+            new_dict[key] = value
+        return new_dict
+
     def objects(self) -> Dict[str, "PBXObject"]:
         """Resolve objects reference.
 

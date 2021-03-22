@@ -103,12 +103,21 @@ class XcodeProject:
             )
         )
 
+        self.project = self.objects[tree["rootObject"]]
+        self._cached_items = {}
+
+        self._set_weak_refs()
+
+    def __setstate__(self, state):
+        """Restore state from the unpickled state values."""
+        self.__dict__ = state
+        self._set_weak_refs()
+
+    def _set_weak_refs(self) -> None:
+        """Setup the weak references."""
         for obj in self.objects.values():
             obj.objects_ref = weakref.ref(self.objects)
             obj.project_ref = weakref.ref(self)
-
-        self.project = self.objects[tree["rootObject"]]
-        self._cached_items = {}
 
     def _populate_cache(self, object_type: Type[PBXObject]) -> None:
         """Populate the cache of items specified.

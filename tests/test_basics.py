@@ -1,7 +1,9 @@
 """Tests for the package."""
 
 import os
+import pickle
 import sys
+import tempfile
 
 import pytest
 
@@ -254,3 +256,26 @@ def test_target_containing_phase(one: xcodeproj.XcodeProject) -> None:
 
     target2 = one.target_containing_phase("hodor")
     assert target2 is None
+
+
+def test_pickling(one: xcodeproj.XcodeProject) -> None:
+    """Test that pickling works.
+
+    :param one: The project
+    """
+
+    temp = tempfile.mktemp()
+
+    try:
+        with open(temp, "wb") as output:
+            pickle.dump(one, output)
+
+        with open(temp, "rb") as input_file:
+            two = pickle.load(input_file)
+
+        assert one.path == two.path
+        assert one.source_root == two.source_root
+        assert one.project == two.project
+        assert one.objects == two.objects
+    finally:
+        os.remove(temp)
