@@ -141,6 +141,42 @@ class XcodeProject:
 
         self._cached_items[object_type.__name__] = cached_items
 
+    def populate_paths(self) -> None:
+        """Pre-emptively populate group paths.
+
+        This method is from the top down so is much quicker.
+        """
+
+        non_set = []
+
+        def populate(parent_group: PBXPathObject, path: Optional[str]) -> None:
+            nonlocal non_set
+
+            if path is not None:
+                setattr(parent_group, "_relative_path", path)
+
+            if not isinstance(parent_group, PBXGroup):
+                return
+
+            for subgroup in parent_group.children:
+                if subgroup.source_tree == "SOURCE_ROOT":
+                    populate(subgroup, subgroup.path)
+                elif subgroup.source_tree == "<group>":
+                    if subgroup.path is not None and path is not None:
+                        populate(subgroup, os.path.join(path, subgroup.path))
+                    elif subgroup.path is not None and path is None:
+                        populate(subgroup, subgroup.path)
+                    else:
+                        non_set.append(subgroup)
+                else:
+                    non_set.append(subgroup)
+
+        root_group = self.objects[self.project.main_group_id]
+        populate(root_group, None)
+
+        for item in non_set:
+            _ = item.relative_path()
+
     def fetch_type(self, object_type: Type[PBXObjectType]) -> Dict[str, PBXObjectType]:
         """Load the items specified from the cache, populating the cache if required.
 

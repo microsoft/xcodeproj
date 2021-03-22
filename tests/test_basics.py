@@ -160,6 +160,78 @@ def test_get_paths(one: xcodeproj.XcodeProject, two: xcodeproj.XcodeProject) -> 
             assert version_group.absolute_path() is None
 
 
+def test_get_paths_prepopulated(one: xcodeproj.XcodeProject, two: xcodeproj.XcodeProject) -> None:
+    """Test that path determination works
+
+    :param one: The project
+    :param two: A different project
+    """
+
+    one.populate_paths()
+    two.populate_paths()
+
+    expected = [
+        "wat WatchKit App/Info.plist",
+        "wat WatchKit Extension/ComplicationController.swift",
+        "wat WatchKit Extension/InterfaceController.swift",
+        "CLJTest/SceneDelegate.swift",
+        "CLJTest/Info.plist",
+        "CLJTest/CLJTest-Bridging-Header.h",
+        "wat WatchKit Extension/Info.plist",
+        "wat WatchKit App/Assets.xcassets",
+        "Carthage/Build/CocoaLumberjack.xcframework",
+        "wat WatchKit Extension/NotificationController.swift",
+        "CLJTest/AppDelegate.swift",
+        "$(BUILT_PRODUCTS_DIR)",
+        "$(BUILT_PRODUCTS_DIR)",
+        "CLJTest/Base.lproj/LaunchScreen.storyboard",
+        "wat WatchKit App/Base.lproj/Interface.storyboard",
+        "wat WatchKit Extension/Assets.xcassets",
+        "CLJTest/Assets.xcassets",
+        "CLJTest/test.m",
+        "wat WatchKit Extension/PushNotificationPayload.apns",
+        "CLJTest/ViewController.swift",
+        "wat WatchKit Extension/ExtensionDelegate.swift",
+        "$(BUILT_PRODUCTS_DIR)",
+        "CLJTest/Base.lproj/Main.storyboard",
+        "$(BUILT_PRODUCTS_DIR)",
+    ]
+
+    for index, item in enumerate(one.fetch_type(xcodeproj.PBXFileReference).values()):
+        assert item.relative_path() == expected[index]
+        assert item.absolute_path() == os.path.join(COLLATERAL_PATH, expected[index])
+
+    groups = [
+        "wat WatchKit App",
+        None,
+        "CLJTest",
+        "CLJTest",
+        "wat WatchKit App",
+        "CLJTest",
+        None,
+        None,
+        "wat WatchKit Extension",
+        "wat WatchKit Extension",
+    ]
+
+    for index, group in enumerate(one.fetch_type(xcodeproj.PBXGroup).values()):
+        value = groups[index]
+        assert group.relative_path() == value
+        if value is None:
+            continue
+        assert group.absolute_path() == os.path.join(COLLATERAL_PATH, value)
+
+    for index, version_group in enumerate(two.fetch_type(xcodeproj.XCVersionGroup).values()):
+        if index == 0:
+            with pytest.raises(Exception):
+                _ = version_group.relative_path()
+            with pytest.raises(Exception):
+                _ = version_group.absolute_path()
+        else:
+            assert version_group.relative_path() is None
+            assert version_group.absolute_path() is None
+
+
 def test_get_parents(two: xcodeproj.XcodeProject) -> None:
     """Test that getting parents works.
 
