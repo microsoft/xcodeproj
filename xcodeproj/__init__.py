@@ -40,6 +40,7 @@ from .pathobjects import (
 )
 from .pbxproject import PBXProject
 from .other import PBXTargetDependency, PBXContainerItemProxy
+from .schemes import Scheme
 from .targets import PBXAggregateTarget, PBXNativeTarget, PBXProductType
 from .xcobjects import XCBuildConfiguration, XCConfigurationList
 
@@ -85,6 +86,7 @@ class XcodeProject:
     objects: Objects
     project: PBXProject
     _cached_items: Dict[str, Dict[str, PBXObject]]
+    _schemes: Optional[List[Scheme]]
 
     def __init__(self, path: str) -> None:
         self.path = path
@@ -105,6 +107,7 @@ class XcodeProject:
 
         self.project = self.objects[tree["rootObject"]]
         self._cached_items = {}
+        self._schemes = None
 
         self._set_weak_refs()
 
@@ -239,3 +242,29 @@ class XcodeProject:
             return native_target.build_configuration_list
 
         return None
+
+    @property
+    def schemes(self) -> List[Scheme]:
+        """Load the schemes for the project.
+
+        :returns: A list of schemes
+        """
+        if self._schemes is not None:
+            return self._schemes
+
+        scheme_paths = []
+
+        for path, _, files in os.walk(self.path):
+            for file_path in files:
+                if not file_path.endswith(".xcscheme"):
+                    continue
+                scheme_paths.append(os.path.join(path, file_path))
+
+        all_schemes: List[Scheme] = []
+
+        for scheme_path in scheme_paths:
+            all_schemes.append(Scheme.from_file(scheme_path))
+
+        self._schemes = all_schemes
+
+        return all_schemes

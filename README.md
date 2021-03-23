@@ -2,7 +2,7 @@
 
 `xcodeproj` is a utility for interacting with Xcode's xcodeproj bundle format.
 
-It expects some level of understanding of the internals of the pbxproj format and, in the future, schemes, etc. Note that this tool only reads projects. It does not write out any changes. If you are looking for more advanced functionality like this, I recommend looking at the Ruby gem of the same name (which is unaffiliated in anyway). 
+It expects some level of understanding of the internals of the pbxproj format and schemes. Note that this tool only reads projects. It does not write out any changes. If you are looking for more advanced functionality like this, I recommend looking at the Ruby gem of the same name (which is unaffiliated in anyway). 
 
 To learn more about the format, you can look at any of these locations:
 
@@ -26,7 +26,7 @@ for target in project.targets:
     print(target.name)
 
 # Print from the root level, 2 levels deep (.project is a property on the root 
-# project as in the future more surfaces, such as schemes, will be exposed)
+# project as other properties such as .schemes are also available)
 for item1 in project.project.main_group.children:
     print(item1)
     if not isinstance(item1, xcodeproj.PBXGroup):
@@ -48,6 +48,9 @@ key = obj.object_key
 ```
 
 Note: This library is "lazy". Many things aren't calculated until they are used. This time will be inconsequential on smaller projects, but on larger ones, it can save quite a bit of time due to not parsing the entire project on load. These properties are usually stored though so that subsequent accesses are instant.
+
+## Note on Scheme Support
+There's no DTD for xcscheme files, so the implementation has been guessed. There will definitely be holes that still need to be patched in it though. Please open an issue if you find any, along with a sample xcscheme file.
 
 ## Contributing
 
