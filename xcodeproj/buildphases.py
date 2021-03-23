@@ -51,7 +51,9 @@ class PBXResourcesBuildPhase(PBXBuildPhase):
 @deserialize.key("shell_path", "shellPath")
 @deserialize.key("shell_script", "shellScript")
 @deserialize.key("show_env_vars_in_log", "showEnvVarsInLog")
+@deserialize.key("always_out_of_date", "alwaysOutOfDate")
 @deserialize.parser("showEnvVarsInLog", lambda x: {"0": False, "1": True}.get(x, True))
+@deserialize.parser("alwaysOutOfDate", lambda x: {"0": False, "1": True}.get(x, True))
 @deserialize.downcast_identifier(PBXObject, "PBXShellScriptBuildPhase")
 class PBXShellScriptBuildPhase(PBXBuildPhase):
     """Represents a PBXShellScriptBuildPhase.
@@ -68,6 +70,7 @@ class PBXShellScriptBuildPhase(PBXBuildPhase):
     shell_path: str
     shell_script: str
     show_env_vars_in_log: Optional[bool]
+    always_out_of_date: Optional[bool]
 
 
 @deserialize.key("destination_path", "dstPath")
