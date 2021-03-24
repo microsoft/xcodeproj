@@ -3,6 +3,7 @@
 import xml.etree.ElementTree as ET
 
 # pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-branches
 
 
 class Action:
@@ -11,17 +12,38 @@ class Action:
     def __init__(self, node) -> None:
         self.command_line_arguments = []
         self.environment_variables = []
-        self._understood_tags = {"CommandLineArguments", "EnvironmentVariables", "MacroExpansion"}
+        self.additional_options = []
+        self._understood_tags = {
+            "CommandLineArguments",
+            "EnvironmentVariables",
+            "MacroExpansion",
+            "AdditionalOptions",
+        }
 
         for child in node:
             if child.tag == "CommandLineArguments":
+                assert len(child.attrib) == 0, f"Unhandled attributes: {list(child.attrib.keys())}"
                 for argument in child:
-                    self.command_line_arguments.append(CommandLineArgument(argument))
+                    if argument.tag == "CommandLineArgument":
+                        self.command_line_arguments.append(CommandLineArgument(argument))
+                    else:
+                        assert False, f"Unknown child: {argument.tag}"
             elif child.tag == "EnvironmentVariables":
+                assert len(child.attrib) == 0, f"Unhandled attributes: {list(child.attrib.keys())}"
                 for variable in child:
-                    self.environment_variables.append(EnvironmentVariable(variable))
+                    if variable.tag == "EnvironmentVariable":
+                        self.environment_variables.append(EnvironmentVariable(variable))
+                    else:
+                        assert False, f"Unknown child: {variable.tag}"
             elif child.tag == "MacroExpansion":
                 self.macro_expansion = MacroExpansion(child)
+            elif child.tag == "AdditionalOptions":
+                assert len(child.attrib) == 0, f"Unhandled attributes: {list(child.attrib.keys())}"
+                for option in child:
+                    if option.tag == "AdditionalOption":
+                        self.additional_options.append(AdditionalOption(option))
+                    else:
+                        assert False, f"Unknown child: {variable.tag}"
 
     def _understands_tag(self, tag: str) -> bool:
         return tag in self._understood_tags
@@ -43,26 +65,37 @@ class BuildableReference:
     """BuildableReference"""
 
     def __init__(self, node) -> None:
-        self.buildable_identifier = node.attrib.get("BuildableIdentifier")
-        self.blueprint_identifier = node.attrib.get("BlueprintIdentifier")
-        self.buildable_name = node.attrib.get("BuildableName")
-        self.blueprint_name = node.attrib.get("BlueprintName")
-        self.referenced_container = node.attrib.get("ReferencedContainer")
+        assert node.tag == "BuildableReference"
+        self.buildable_identifier = node.attrib.pop("BuildableIdentifier", None)
+        self.blueprint_identifier = node.attrib.pop("BlueprintIdentifier", None)
+        self.buildable_name = node.attrib.pop("BuildableName", None)
+        self.blueprint_name = node.attrib.pop("BlueprintName", None)
+        self.referenced_container = node.attrib.pop("ReferencedContainer", None)
+
+        assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
+
+        for child in node:
+            assert False, f"Unknown child: {child.tag}"
 
 
 class BuildActionEntry:
     """BuildActionEntry"""
 
     def __init__(self, node) -> None:
-        self.build_for_testing = node.attrib.get("buildForTesting") == "YES"
-        self.build_for_running = node.attrib.get("buildForRunning") == "YES"
-        self.build_for_profiling = node.attrib.get("buildForProfiling") == "YES"
-        self.build_for_archiving = node.attrib.get("buildForArchiving") == "YES"
-        self.build_for_analyzing = node.attrib.get("buildForAnalyzing") == "YES"
+        self.build_for_testing = node.attrib.pop("buildForTesting", None) == "YES"
+        self.build_for_running = node.attrib.pop("buildForRunning", None) == "YES"
+        self.build_for_profiling = node.attrib.pop("buildForProfiling", None) == "YES"
+        self.build_for_archiving = node.attrib.pop("buildForArchiving", None) == "YES"
+        self.build_for_analyzing = node.attrib.pop("buildForAnalyzing", None) == "YES"
         self.buildable_references = []
 
+        assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
+
         for child in node:
-            self.buildable_references.append(BuildableReference(child))
+            if child.tag == "BuildableReference":
+                self.buildable_references.append(BuildableReference(child))
+            else:
+                assert False, f"Unknown child: {child.tag}"
 
 
 class MacroExpansion:
@@ -72,7 +105,10 @@ class MacroExpansion:
         self.buildable_references = []
 
         for child in node:
-            self.buildable_references.append(BuildableReference(child))
+            if child.tag == "BuildableReference":
+                self.buildable_references.append(BuildableReference(child))
+            else:
+                assert False, f"Unknown child: {child.tag}"
 
 
 class CodeCoverageTargets:
@@ -82,19 +118,69 @@ class CodeCoverageTargets:
         self.buildable_references = []
 
         for child in node:
-            self.buildable_references.append(BuildableReference(child))
+            if child.tag == "BuildableReference":
+                self.buildable_references.append(BuildableReference(child))
+            else:
+                assert False, f"Unknown child: {child.tag}"
+
+
+class LocationScenarioReference:
+    """LocationScenarioReference"""
+
+    def __init__(self, node) -> None:
+        assert node.tag == "LocationScenarioReference"
+        self.identifier = node.attrib.pop("identifier", None) == "YES"
+        self.reference_type = node.attrib.pop("referenceType", None) == "YES"
+        assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
+
+
+class Test:
+    """Test"""
+
+    def __init__(self, node) -> None:
+        self.identifier = node.attrib.pop("Identifier", None)
+        assert self.identifier is not None, "Missing identifier for Test"
+        assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
+
+        for child in node:
+            assert False, f"Unknown child: {child.tag}"
 
 
 class TestableReference:
     """TestableReference"""
 
     def __init__(self, node) -> None:
-        self.skipped = node.attrib.get("skipped") == "YES"
-        self.test_execution_ordering = node.attrib.get("testExecutionOrdering")
+        self.skipped = node.attrib.pop("skipped", None) == "YES"
+        self.parallelizable = node.attrib.pop("parallelizable", None) == "YES"
+        self.test_execution_ordering = node.attrib.pop("testExecutionOrdering", None)
         self.buildable_references = []
+        self.selected_tests = []
+        self.skipped_tests = []
+        self.location_scenario_reference = None
+
+        assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
 
         for child in node:
-            self.buildable_references.append(BuildableReference(child))
+            if child.tag == "BuildableReference":
+                self.buildable_references.append(BuildableReference(child))
+            elif child.tag == "SelectedTests":
+                assert len(child.attrib) == 0, f"Unhandled attributes: {list(child.attrib.keys())}"
+                for test in child:
+                    if test.tag == "Test":
+                        self.selected_tests.append(Test(test))
+                    else:
+                        assert False, f"Unknown child: {test.tag}"
+            elif child.tag == "SkippedTests":
+                assert len(child.attrib) == 0, f"Unhandled attributes: {list(child.attrib.keys())}"
+                for test in child:
+                    if test.tag == "Test":
+                        self.skipped_tests.append(Test(test))
+                    else:
+                        assert False, f"Unknown child: {test.tag}"
+            elif child.tag == "LocationScenarioReference":
+                self.location_scenario_reference = LocationScenarioReference(child)
+            else:
+                assert False, f"Unknown child: {child.tag}"
 
 
 class TestPlanReference:
@@ -102,29 +188,57 @@ class TestPlanReference:
 
     def __init__(self, node) -> None:
         assert node.tag == "TestPlanReference"
-        self.reference = node.attrib.get("reference")
-        self.default = node.attrib.get("default") == "YES"
+        self.reference = node.attrib.pop("reference", None)
+        self.default = node.attrib.pop("default", None) == "YES"
+        assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
+
+        for child in node:
+            assert False, f"Unknown child: {child.tag}"
 
 
 class RemoteRunnable:
     """RemoteRunnable"""
 
     def __init__(self, node) -> None:
-        self.runnable_debugging_mode = node.attrib.get("runnableDebuggingMode")
-        self.bundle_identifier = node.attrib.get("BundleIdentifier")
+        self.runnable_debugging_mode = node.attrib.pop("runnableDebuggingMode", None)
+        self.bundle_identifier = node.attrib.pop("BundleIdentifier", None)
         self.buildable_references = []
+        assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
 
         for child in node:
-            self.buildable_references.append(BuildableReference(child))
+            if child.tag == "BuildableReference":
+                self.buildable_references.append(BuildableReference(child))
+            else:
+                assert False, f"Unknown child: {child.tag}"
 
 
-class EnvironmentVariable:
+class KV:
+    """KV"""
+
+    def __init__(self, node) -> None:
+        self.key = node.attrib.pop("key", None)
+        self.value = node.attrib.pop("value", None)
+        self.is_enabled = node.attrib.pop("isEnabled", None) == "YES"
+        assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
+
+        for child in node:
+            assert False, f"Unknown child: {child.tag}"
+
+
+class EnvironmentVariable(KV):
     """EnvironmentVariable"""
 
     def __init__(self, node) -> None:
-        self.key = node.attrib.get("key")
-        self.value = node.attrib.get("value")
-        self.is_enabled = node.attrib.get("isEnabled") == "YES"
+        assert node.tag == "EnvironmentVariable"
+        super().__init__(node)
+
+
+class AdditionalOption(KV):
+    """AdditionalOption"""
+
+    def __init__(self, node) -> None:
+        assert node.tag == "AdditionalOption"
+        super().__init__(node)
 
 
 class BuildableProductRunnable:
@@ -132,11 +246,15 @@ class BuildableProductRunnable:
 
     def __init__(self, node) -> None:
         assert node.tag == "BuildableProductRunnable"
-        self.runnable_debugging_mode = node.attrib.get("runnableDebuggingMode")
+        self.runnable_debugging_mode = node.attrib.pop("runnableDebuggingMode", None)
         self.buildable_references = []
+        assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
 
         for child in node:
-            self.buildable_references.append(BuildableReference(child))
+            if child.tag == "BuildableReference":
+                self.buildable_references.append(BuildableReference(child))
+            else:
+                assert False, f"Unknown child: {child.tag}"
 
 
 class CommandLineArgument:
@@ -144,8 +262,12 @@ class CommandLineArgument:
 
     def __init__(self, node) -> None:
         assert node.tag == "CommandLineArgument"
-        self.argument = node.attrib.get("argument")
-        self.is_enabled = node.attrib.get("isEnabled") == "YES"
+        self.argument = node.attrib.pop("argument", None)
+        self.is_enabled = node.attrib.pop("isEnabled", None) == "YES"
+        assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
+
+        for child in node:
+            assert False, f"Unknown child: {child.tag}"
 
 
 class BuildAction(Action):
@@ -154,14 +276,21 @@ class BuildAction(Action):
     def __init__(self, node) -> None:
         assert node.tag == "BuildAction"
         super().__init__(node)
-        self.parallelize_buildables = node.attrib.get("parallelizeBuildables") == "YES"
-        self.build_implicit_dependencies = node.attrib.get("buildImplicitDependencies") == "YES"
+        self.parallelize_buildables = node.attrib.pop("parallelizeBuildables", None) == "YES"
+        self.build_implicit_dependencies = (
+            node.attrib.pop("buildImplicitDependencies", None) == "YES"
+        )
         self.build_action_entries = []
+        assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
+
         for child in node:
             if child.tag == "BuildActionEntries":
+                assert len(child.attrib) == 0, f"Unhandled attributes: {list(child.attrib.keys())}"
                 for entry in child:
-                    assert entry.tag == "BuildActionEntry"
-                    self.build_action_entries.append(BuildActionEntry(entry))
+                    if entry.tag == "BuildActionEntry":
+                        self.build_action_entries.append(BuildActionEntry(entry))
+                    else:
+                        assert False, f"Unknown child: {entry.tag}"
             else:
                 assert self._understands_tag(child.tag)
 
@@ -172,28 +301,43 @@ class TestAction(Action):
     def __init__(self, node) -> None:
         assert node.tag == "TestAction"
         super().__init__(node)
-        self.build_configuration = node.attrib.get("buildConfiguration")
-        self.selected_debugger_identifier = node.attrib.get("selectedDebuggerIdentifier")
-        self.selected_launcher_identifier = node.attrib.get("selectedLauncherIdentifier")
+        self.build_configuration = node.attrib.pop("buildConfiguration", None)
+        self.selected_debugger_identifier = node.attrib.pop("selectedDebuggerIdentifier", None)
+        self.selected_launcher_identifier = node.attrib.pop("selectedLauncherIdentifier", None)
         self.should_use_launch_scheme_args_env = (
-            node.attrib.get("shouldUseLaunchSchemeArgsEnv") == "YES"
+            node.attrib.pop("shouldUseLaunchSchemeArgsEnv", None) == "YES"
         )
-        self.code_coverage_enabled = node.attrib.get("codeCoverageEnabled") == "YES"
+        self.code_coverage_enabled = node.attrib.pop("codeCoverageEnabled", None) == "YES"
+        self.disable_main_thread_checker = (
+            node.attrib.pop("disableMainThreadChecker", None) == "YES"
+        )
+        self.system_attachment_lifetime = node.attrib.pop("systemAttachmentLifetime", None)
         self.only_generate_coverage_for_specific_targets = (
-            node.attrib.get("onlyGenerateCoverageForSpecifiedTargets") == "YES"
+            node.attrib.pop("onlyGenerateCoverageForSpecifiedTargets", None) == "YES"
         )
+        self.language = node.attrib.pop("language", None)
         self.test_plans = []
+        self.testables = []
+        self.code_coverage_targets = None
+        assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
 
         for child in node:
             if child.tag == "CodeCoverageTargets":
                 self.code_coverage_targets = CodeCoverageTargets(child)
             elif child.tag == "Testables":
-                self.testables = []
+                assert len(child.attrib) == 0, f"Unhandled attributes: {list(child.attrib.keys())}"
                 for testable in child:
-                    self.testables.append(TestableReference(testable))
+                    if testable.tag == "TestableReference":
+                        self.testables.append(TestableReference(testable))
+                    else:
+                        assert False, f"Unknown child: {testable.tag}"
             elif child.tag == "TestPlans":
+                assert len(child.attrib) == 0, f"Unhandled attributes: {list(child.attrib.keys())}"
                 for plan in child:
-                    self.test_plans.append(TestPlanReference(plan))
+                    if plan.tag == "TestPlanReference":
+                        self.test_plans.append(TestPlanReference(plan))
+                    else:
+                        assert False, f"Unknown child: {plan.tag}"
             else:
                 assert self._understands_tag(child.tag)
 
@@ -204,19 +348,28 @@ class LaunchAction(RunAction):
     def __init__(self, node) -> None:
         assert node.tag == "LaunchAction"
         super().__init__(node)
-        self.build_configuration = node.attrib.get("buildConfiguration")
-        self.selected_debugger_identifier = node.attrib.get("selectedDebuggerIdentifier")
-        self.selected_launcher_identifier = node.attrib.get("selectedLauncherIdentifier")
-        self.launch_style = node.attrib.get("launchStyle")
-        self.use_custom_working_directory = node.attrib.get("useCustomWorkingDirectory") == "YES"
-        self.ignores_persistent_state_on_launch = (
-            node.attrib.get("ignoresPersistentStateOnLaunch") == "YES"
+        self.build_configuration = node.attrib.pop("buildConfiguration", None)
+        self.selected_debugger_identifier = node.attrib.pop("selectedDebuggerIdentifier", None)
+        self.selected_launcher_identifier = node.attrib.pop("selectedLauncherIdentifier", None)
+        self.launch_style = node.attrib.pop("launchStyle", None)
+        self.use_custom_working_directory = (
+            node.attrib.pop("useCustomWorkingDirectory", None) == "YES"
         )
-        self.debug_document_versioning = node.attrib.get("debugDocumentVersioning") == "YES"
-        self.debug_service_extension = node.attrib.get("debugServiceExtension")
-        self.allow_location_simulation = node.attrib.get("allowLocationSimulation") == "YES"
-        self.ask_for_app_to_launch = node.attrib.get("askForAppToLaunch") == "YES"
-        self.launch_automatically_substyle = node.attrib.get("launchAutomaticallySubstyle") == "YES"
+        self.ignores_persistent_state_on_launch = (
+            node.attrib.pop("ignoresPersistentStateOnLaunch", None) == "YES"
+        )
+        self.debug_document_versioning = node.attrib.pop("debugDocumentVersioning", None) == "YES"
+        self.debug_service_extension = node.attrib.pop("debugServiceExtension", None)
+        self.debug_xpc_services = node.attrib.pop("debugXPCServices", None) == "YES"
+        self.allow_location_simulation = node.attrib.pop("allowLocationSimulation", None) == "YES"
+        self.ask_for_app_to_launch = node.attrib.pop("askForAppToLaunch", None) == "YES"
+        self.launch_automatically_substyle = (
+            node.attrib.pop("launchAutomaticallySubstyle", None) == "YES"
+        )
+        self.language = node.attrib.pop("language", None)
+        self.buildable_product_runnable = None
+
+        assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
 
         for child in node:
             if child.tag == "BuildableProductRunnable":
@@ -231,13 +384,21 @@ class ProfileAction(RunAction):
     def __init__(self, node) -> None:
         assert node.tag == "ProfileAction"
         super().__init__(node)
-        self.build_configuration = node.attrib.get("buildConfiguration")
+        self.build_configuration = node.attrib.pop("buildConfiguration", None)
         self.should_use_launch_scheme_args_env = (
-            node.attrib.get("shouldUseLaunchSchemeArgsEnv") == "YES"
+            node.attrib.pop("shouldUseLaunchSchemeArgsEnv", None) == "YES"
         )
-        self.saved_tool_identifier = node.attrib.get("savedToolIdentifier")
-        self.use_custom_working_directory = node.attrib.get("useCustomWorkingDirectory") == "YES"
-        self.debug_document_versioning = node.attrib.get("debugDocumentVersioning") == "YES"
+        self.saved_tool_identifier = node.attrib.pop("savedToolIdentifier", None)
+        self.use_custom_working_directory = (
+            node.attrib.pop("useCustomWorkingDirectory", None) == "YES"
+        )
+        self.debug_document_versioning = node.attrib.pop("debugDocumentVersioning", None) == "YES"
+        self.launch_automatically_substyle = (
+            node.attrib.pop("launchAutomaticallySubstyle", None) == "YES"
+        )
+        self.buildable_product_runnable = None
+
+        assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
 
         for child in node:
             if child.tag == "BuildableProductRunnable":
@@ -252,7 +413,12 @@ class AnalyzeAction(Action):
     def __init__(self, node) -> None:
         assert node.tag == "AnalyzeAction"
         super().__init__(node)
-        self.build_configuration = node.attrib.get("buildConfiguration")
+        self.build_configuration = node.attrib.pop("buildConfiguration", None)
+
+        assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
+
+        for child in node:
+            assert False, f"Unknown child: {child.tag}"
 
 
 class ArchiveAction(Action):
@@ -261,8 +427,15 @@ class ArchiveAction(Action):
     def __init__(self, node) -> None:
         assert node.tag == "ArchiveAction"
         super().__init__(node)
-        self.build_configuration = node.attrib.get("buildConfiguration")
-        self.reveal_archive_in_organizer = node.attrib.get("revealArchiveInOrganizer") == "YES"
+        self.build_configuration = node.attrib.pop("buildConfiguration", None)
+        self.reveal_archive_in_organizer = (
+            node.attrib.pop("revealArchiveInOrganizer", None) == "YES"
+        )
+
+        assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
+
+        for child in node:
+            assert False, f"Unknown child: {child.tag}"
 
 
 class Scheme:
@@ -270,9 +443,19 @@ class Scheme:
 
     def __init__(self, node) -> None:
         assert node.tag == "Scheme"
-        self.last_upgrade_version = node.attrib.get("LastUpgradeVersion")
-        self.version = node.attrib.get("version")
-        self.was_created_for_app_extension = node.attrib.get("wasCreatedForAppExtension") == "YES"
+        self.last_upgrade_version = node.attrib.pop("LastUpgradeVersion", None)
+        self.version = node.attrib.pop("version", None)
+        self.was_created_for_app_extension = (
+            node.attrib.pop("wasCreatedForAppExtension", None) == "YES"
+        )
+        self.build_action = None
+        self.test_action = None
+        self.launch_action = None
+        self.profile_action = None
+        self.analyze_action = None
+        self.archive_action = None
+
+        assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
 
         for child in node:
             if child.tag == "BuildAction":
@@ -288,7 +471,7 @@ class Scheme:
             elif child.tag == "ArchiveAction":
                 self.archive_action = ArchiveAction(child)
             else:
-                assert False
+                assert False, f"Unknown child: {child.tag}"
 
     @staticmethod
     def from_file(path: str) -> "Scheme":
@@ -301,4 +484,15 @@ class Scheme:
         tree = ET.parse(path)
         root = tree.getroot()
 
+        return Scheme(root)
+
+    @staticmethod
+    def from_string(contents: str) -> "Scheme":
+        """Load a scheme from a string.
+
+        :param contents: The XML string
+
+        :returns: A loaded scheme
+        """
+        root = ET.fromstring(contents)
         return Scheme(root)

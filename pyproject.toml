@@ -37,6 +37,7 @@ mypy = "=0.800"
 pylint = "=2.6.0"
 pytest = "=6.2.2"
 pytest-cov = "=2.11.1"
+requests = "^2.25.1"
 
 [build-system]
 requires = ["poetry>=0.12"]
