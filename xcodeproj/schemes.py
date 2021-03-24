@@ -23,6 +23,7 @@ class Action:
             "AdditionalOptions",
             "PreActions",
             "PostActions",
+            "buildConfiguration",
         }
 
         self._understood_attributes = {
@@ -33,6 +34,7 @@ class Action:
             "enableASanStackUseAfterReturn",
             "enableGPUValidationMode",
         }
+        self.build_configuration = node.attrib.pop("buildConfiguration", None)
         self.enable_address_sanitizer = node.attrib.pop("enableAddressSanitizer", None) == "YES"
         self.enable_thread_sanitizer = node.attrib.pop("enableThreadSanitizer", None) == "YES"
         self.enable_ub_sanitizer = node.attrib.pop("enableUBSanitizer", None) == "YES"
