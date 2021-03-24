@@ -1,5 +1,6 @@
 """Schemes"""
 
+import os
 import xml.etree.ElementTree as ET
 
 # pylint: disable=too-many-instance-attributes
@@ -13,12 +14,35 @@ class Action:
         self.command_line_arguments = []
         self.environment_variables = []
         self.additional_options = []
+        self.pre_actions = []
+        self.post_actions = []
         self._understood_tags = {
             "CommandLineArguments",
             "EnvironmentVariables",
             "MacroExpansion",
             "AdditionalOptions",
+            "PreActions",
+            "PostActions",
         }
+
+        self._understood_attributes = {
+            "enableAddressSanitizer",
+            "enableThreadSanitizer",
+            "enableUBSanitizer",
+            "disableMainThreadChecker",
+            "enableASanStackUseAfterReturn",
+            "enableGPUValidationMode",
+        }
+        self.enable_address_sanitizer = node.attrib.pop("enableAddressSanitizer", None) == "YES"
+        self.enable_thread_sanitizer = node.attrib.pop("enableThreadSanitizer", None) == "YES"
+        self.enable_ub_sanitizer = node.attrib.pop("enableUBSanitizer", None) == "YES"
+        self.enable_asan_stack_use_after_return = (
+            node.attrib.pop("enableASanStackUseAfterReturn", None) == "YES"
+        )
+        self.enable_gpu_validation_mode = node.attrib.pop("enableGPUValidationMode", None)
+        self.disable_main_thread_checker = (
+            node.attrib.pop("disableMainThreadChecker", None) == "YES"
+        )
 
         for child in node:
             if child.tag == "CommandLineArguments":
@@ -42,6 +66,20 @@ class Action:
                 for option in child:
                     if option.tag == "AdditionalOption":
                         self.additional_options.append(AdditionalOption(option))
+                    else:
+                        assert False, f"Unknown child: {variable.tag}"
+            elif child.tag == "PreActions":
+                assert len(child.attrib) == 0, f"Unhandled attributes: {list(child.attrib.keys())}"
+                for action in child:
+                    if action.tag == "ExecutionAction":
+                        self.pre_actions.append(ExecutionAction(action))
+                    else:
+                        assert False, f"Unknown child: {variable.tag}"
+            elif child.tag == "PostActions":
+                assert len(child.attrib) == 0, f"Unhandled attributes: {list(child.attrib.keys())}"
+                for action in child:
+                    if action.tag == "ExecutionAction":
+                        self.post_actions.append(ExecutionAction(action))
                     else:
                         assert False, f"Unknown child: {variable.tag}"
 
@@ -152,6 +190,9 @@ class TestableReference:
     def __init__(self, node) -> None:
         self.skipped = node.attrib.pop("skipped", None) == "YES"
         self.parallelizable = node.attrib.pop("parallelizable", None) == "YES"
+        self.use_test_selection_whitelist = (
+            node.attrib.pop("useTestSelectionWhitelist", None) == "YES"
+        )
         self.test_execution_ordering = node.attrib.pop("testExecutionOrdering", None)
         self.buildable_references = []
         self.selected_tests = []
@@ -202,6 +243,7 @@ class RemoteRunnable:
     def __init__(self, node) -> None:
         self.runnable_debugging_mode = node.attrib.pop("runnableDebuggingMode", None)
         self.bundle_identifier = node.attrib.pop("BundleIdentifier", None)
+        self.remote_path = node.attrib.pop("RemotePath", None)
         self.buildable_references = []
         assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
 
@@ -270,6 +312,36 @@ class CommandLineArgument:
             assert False, f"Unknown child: {child.tag}"
 
 
+class ActionContent:
+    """ActionContent"""
+
+    def __init__(self, node) -> None:
+        assert node.tag == "ActionContent"
+        self.title = node.attrib.pop("title", None)
+        self.script_text = node.attrib.pop("scriptText", None)
+        assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
+
+        for child in node:
+            assert False, f"Unknown child: {child.tag}"
+
+
+class ExecutionAction:
+    """ExecutionAction"""
+
+    def __init__(self, node) -> None:
+        assert node.tag == "ExecutionAction"
+        self.action_type = node.attrib.pop("ActionType", None)
+        assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
+        self.action_content = None
+
+        for child in node:
+            assert self.action_content is None
+            if child.tag == "ActionContent":
+                self.action_content = ActionContent(child)
+            else:
+                assert False, f"Unknown child: {child.tag}"
+
+
 class BuildAction(Action):
     """BuildAction"""
 
@@ -308,9 +380,6 @@ class TestAction(Action):
             node.attrib.pop("shouldUseLaunchSchemeArgsEnv", None) == "YES"
         )
         self.code_coverage_enabled = node.attrib.pop("codeCoverageEnabled", None) == "YES"
-        self.disable_main_thread_checker = (
-            node.attrib.pop("disableMainThreadChecker", None) == "YES"
-        )
         self.system_attachment_lifetime = node.attrib.pop("systemAttachmentLifetime", None)
         self.only_generate_coverage_for_specific_targets = (
             node.attrib.pop("onlyGenerateCoverageForSpecifiedTargets", None) == "YES"
@@ -366,7 +435,13 @@ class LaunchAction(RunAction):
         self.launch_automatically_substyle = (
             node.attrib.pop("launchAutomaticallySubstyle", None) == "YES"
         )
+        self.migrated_stop_on_every_issue = (
+            node.attrib.pop("migratedStopOnEveryIssue", None) == "YES"
+        )
         self.language = node.attrib.pop("language", None)
+        self.notification_payload_file = node.attrib.pop("notificationPayloadFile", None)
+        self.console_mode = node.attrib.pop("consoleMode", None)
+        self.region = node.attrib.pop("region", None)
         self.buildable_product_runnable = None
 
         assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
@@ -418,7 +493,7 @@ class AnalyzeAction(Action):
         assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
 
         for child in node:
-            assert False, f"Unknown child: {child.tag}"
+            assert self._understands_tag(child.tag)
 
 
 class ArchiveAction(Action):
@@ -431,18 +506,20 @@ class ArchiveAction(Action):
         self.reveal_archive_in_organizer = (
             node.attrib.pop("revealArchiveInOrganizer", None) == "YES"
         )
+        self.custom_archive_name = node.attrib.pop("customArchiveName", None)
 
         assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
 
         for child in node:
-            assert False, f"Unknown child: {child.tag}"
+            assert self._understands_tag(child.tag)
 
 
 class Scheme:
     """Represents an Xcode scheme."""
 
-    def __init__(self, node) -> None:
+    def __init__(self, node, name: str) -> None:
         assert node.tag == "Scheme"
+        self.name = name
         self.last_upgrade_version = node.attrib.pop("LastUpgradeVersion", None)
         self.version = node.attrib.pop("version", None)
         self.was_created_for_app_extension = (
@@ -484,15 +561,16 @@ class Scheme:
         tree = ET.parse(path)
         root = tree.getroot()
 
-        return Scheme(root)
+        return Scheme(root, ".".join(os.path.basename(path).split(".")[:-1]))
 
     @staticmethod
-    def from_string(contents: str) -> "Scheme":
+    def from_string(contents: str, name: str) -> "Scheme":
         """Load a scheme from a string.
 
         :param contents: The XML string
+        :param name: The name of the scheme
 
         :returns: A loaded scheme
         """
         root = ET.fromstring(contents)
-        return Scheme(root)
+        return Scheme(root, name)

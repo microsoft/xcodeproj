@@ -102,5 +102,7 @@ def test_remote_schemes() -> None:
             assert metadata["encoding"] == "base64"
             base64_content = metadata["content"]
             content = base64.b64decode(base64_content).decode("utf-8")
-            parsed = xcodeproj.Scheme.from_string(content)
+            parsed = xcodeproj.Scheme.from_string(
+                content, os.path.basename(scheme_file["path"]).replace(".xcscheme", "")
+            )
             assert parsed is not None
