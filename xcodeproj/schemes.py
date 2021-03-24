@@ -33,6 +33,12 @@ class Action:
             "disableMainThreadChecker",
             "enableASanStackUseAfterReturn",
             "enableGPUValidationMode",
+            "migratedStopOnEveryIssue",
+            "language",
+            "region",
+            "allowLocationSimulation",
+            "askForAppToLaunch",
+            "launchAutomaticallySubstyle",
         }
         self.build_configuration = node.attrib.pop("buildConfiguration", None)
         self.enable_address_sanitizer = node.attrib.pop("enableAddressSanitizer", None) == "YES"
@@ -45,6 +51,14 @@ class Action:
         self.disable_main_thread_checker = (
             node.attrib.pop("disableMainThreadChecker", None) == "YES"
         )
+        self.migrated_stop_on_every_issue = (
+            node.attrib.pop("migratedStopOnEveryIssue", None) == "YES"
+        )
+        self.language = node.attrib.pop("language", None)
+        self.region = node.attrib.pop("region", None)
+        self.allow_location_simulation = node.attrib.pop("allowLocationSimulation", None) == "YES"
+        self.ask_for_app_to_launch = node.attrib.pop("askForAppToLaunch", None) == "YES"
+        self.launch_automatically_substyle = node.attrib.pop("launchAutomaticallySubstyle", None)
 
         for child in node:
             if child.tag == "CommandLineArguments":
@@ -386,7 +400,6 @@ class TestAction(Action):
         self.only_generate_coverage_for_specific_targets = (
             node.attrib.pop("onlyGenerateCoverageForSpecifiedTargets", None) == "YES"
         )
-        self.language = node.attrib.pop("language", None)
         self.test_plans = []
         self.testables = []
         self.code_coverage_targets = None
@@ -432,18 +445,9 @@ class LaunchAction(RunAction):
         self.debug_document_versioning = node.attrib.pop("debugDocumentVersioning", None) == "YES"
         self.debug_service_extension = node.attrib.pop("debugServiceExtension", None)
         self.debug_xpc_services = node.attrib.pop("debugXPCServices", None) == "YES"
-        self.allow_location_simulation = node.attrib.pop("allowLocationSimulation", None) == "YES"
-        self.ask_for_app_to_launch = node.attrib.pop("askForAppToLaunch", None) == "YES"
-        self.launch_automatically_substyle = (
-            node.attrib.pop("launchAutomaticallySubstyle", None) == "YES"
-        )
-        self.migrated_stop_on_every_issue = (
-            node.attrib.pop("migratedStopOnEveryIssue", None) == "YES"
-        )
         self.language = node.attrib.pop("language", None)
         self.notification_payload_file = node.attrib.pop("notificationPayloadFile", None)
         self.console_mode = node.attrib.pop("consoleMode", None)
-        self.region = node.attrib.pop("region", None)
         self.buildable_product_runnable = None
 
         assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
