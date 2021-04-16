@@ -1,9 +1,16 @@
 """Xcode project file management."""
 
+try:
+    import _pickle as pickle
+except ImportError:
+    import pickle  # type: ignore
+
 from collections import defaultdict
 import functools
+import hashlib
 import json
 import os
+import pathlib
 from typing import (
     Any,
     cast,
@@ -87,6 +94,7 @@ class XcodeProject:
     project: PBXProject
     _cached_items: Dict[str, Dict[str, PBXObject]]
     _schemes: Optional[List[Scheme]]
+    _is_populated: bool
 
     def __init__(self, path: str) -> None:
         self.path = path
@@ -108,8 +116,42 @@ class XcodeProject:
         self.project = self.objects[tree["rootObject"]]
         self._cached_items = {}
         self._schemes = None
+        self._is_populated = False
 
         self._set_weak_refs()
+
+    @staticmethod
+    def from_cache(cache_folder: str, project_path: str) -> "XcodeProject":
+        """Attempt to load the project from a cached folder if possible.
+
+        :param cache_folder: The folder the cached projects live in
+        :param project_path: The path to the actual project (in case it's a cache miss)
+
+        :returns: The loaded XcodeProj
+        """
+        try:
+            project_hash = hashlib.md5(
+                pathlib.Path(os.path.join(project_path, "project.pbxproj")).read_bytes()
+            ).hexdigest()
+
+            with open(os.path.join(cache_folder, f"{project_hash}.dat"), "rb") as cached_file:
+                return pickle.load(cached_file)
+        except Exception:
+            return XcodeProject(project_path)
+
+    def write_cache(self, cache_folder: str) -> None:
+        """Write out this file to a cache
+
+        :param cache_folder: The folder to store the cached project in.
+        """
+        self.populate_paths()
+
+        project_hash = hashlib.md5(
+            pathlib.Path(os.path.join(self.path, "project.pbxproj")).read_bytes()
+        ).hexdigest()
+
+        with open(os.path.join(cache_folder, f"{project_hash}.dat"), "wb") as cached_file:
+            pickle.dump(self, cached_file)
 
     def __setstate__(self, state):
         """Restore state from the unpickled state values."""
@@ -150,6 +192,9 @@ class XcodeProject:
         This method is from the top down so is much quicker.
         """
 
+        if self._is_populated:
+            return
+
         non_set = []
 
         def populate(parent_group: PBXPathObject, path: Optional[str]) -> None:
@@ -183,6 +228,8 @@ class XcodeProject:
 
         for item in non_set:
             _ = item.relative_path()
+
+        self._is_populated = True
 
     def fetch_type(self, object_type: Type[PBXObjectType]) -> Dict[str, PBXObjectType]:
         """Load the items specified from the cache, populating the cache if required.
