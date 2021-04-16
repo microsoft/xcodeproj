@@ -197,6 +197,7 @@ class XCVersionGroup(PBXPathObject):
     child_ids: List[str]
     current_version: str
     version_group_type: str
+    name: Optional[str]
 
     @property
     def children(self) -> List[PBXPathObject]:
