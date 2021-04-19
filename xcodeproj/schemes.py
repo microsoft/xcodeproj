@@ -328,6 +328,22 @@ class CommandLineArgument:
             assert False, f"Unknown child: {child.tag}"
 
 
+class EnvironmentBuildable:
+    """EnvironmentBuildable"""
+
+    def __init__(self, node) -> None:
+        assert node.tag == "EnvironmentBuildable"
+        self.buildable_references = []
+
+        assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
+
+        for child in node:
+            if child.tag == "BuildableReference":
+                self.buildable_references.append(BuildableReference(child))
+            else:
+                assert False, f"Unknown child: {child.tag}"
+
+
 class ActionContent:
     """ActionContent"""
 
@@ -335,10 +351,14 @@ class ActionContent:
         assert node.tag == "ActionContent"
         self.title = node.attrib.pop("title", None)
         self.script_text = node.attrib.pop("scriptText", None)
+        self.environment_buildable = None
         assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
 
         for child in node:
-            assert False, f"Unknown child: {child.tag}"
+            if child.tag == "EnvironmentBuildable":
+                self.environment_buildable = EnvironmentBuildable(child)
+            else:
+                assert False, f"Unknown child: {child.tag}"
 
 
 class ExecutionAction:
