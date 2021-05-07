@@ -121,10 +121,12 @@ class PBXPathObject(PBXObject):
 
 @deserialize.key("indent_width", "indentWidth")
 @deserialize.key("tab_width", "tabWidth")
+@deserialize.key("uses_tabs", "usesTabs")
 @deserialize.key("children_ids", "children")
 @deserialize.ignore("_path")
 @deserialize.parser("indentWidth", lambda x: int(x) if x else None)
 @deserialize.parser("tabWidth", lambda x: int(x) if x else None)
+@deserialize.parser("usesTabs", lambda x: int(x) > 0 if x else False)
 @deserialize.downcast_identifier(PBXObject, "PBXGroup")
 class PBXGroup(PBXPathObject):
     """Represents a PBXGroup.
@@ -135,6 +137,7 @@ class PBXGroup(PBXPathObject):
     children_ids: List[str]
     indent_width: Optional[int]
     tab_width: Optional[int]
+    uses_tabs: Optional[bool]
     name: Optional[str]
 
     @property
