@@ -86,7 +86,7 @@ class PBXCopyFilesBuildPhase(PBXBuildPhase):
     other phases exist.
     """
 
-    destination_path: str
+    destination_path: Optional[str]
     destination_subfolder_spec: int
     name: Optional[str]
 
