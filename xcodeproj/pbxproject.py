@@ -1,6 +1,6 @@
 """PBXProject object."""
 
-from typing import Any, cast, Dict, List
+from typing import Any, cast, Dict, List, Optional
 
 import deserialize
 
@@ -29,7 +29,7 @@ class PBXProject(PBXObject):
     has_scanned_for_encodings: bool
     known_regions: List[str]
     main_group_id: str
-    product_ref_group: str
+    product_ref_group: Optional[str]
     project_dir_path: str
     project_root: str
     target_ids: List[str]
