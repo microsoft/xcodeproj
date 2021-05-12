@@ -469,6 +469,9 @@ class LaunchAction(RunAction):
         self.notification_payload_file = node.attrib.pop("notificationPayloadFile", None)
         self.console_mode = node.attrib.pop("consoleMode", None)
         self.buildable_product_runnable = None
+        self.stop_on_every_main_thread_checker_issue = (
+            node.attrib.pop("stopOnEveryMainThreadCheckerIssue", None) == "YES"
+        )
 
         assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
 
