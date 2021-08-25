@@ -24,6 +24,7 @@ from typing import (
 import subprocess
 import weakref
 
+import appdirs
 import deserialize
 
 from .pbxobject import PBXObject
@@ -121,14 +122,15 @@ class XcodeProject:
         self._set_weak_refs()
 
     @staticmethod
-    def from_cache(cache_folder: str, project_path: str) -> "XcodeProject":
+    def from_cache(project_path: str) -> "XcodeProject":
         """Attempt to load the project from a cached folder if possible.
 
-        :param cache_folder: The folder the cached projects live in
         :param project_path: The path to the actual project (in case it's a cache miss)
 
         :returns: The loaded XcodeProj
         """
+        cache_folder = appdirs.user_cache_dir("xcodeproj")
+
         try:
             project_hash = hashlib.md5(
                 pathlib.Path(os.path.join(project_path, "project.pbxproj")).read_bytes()
@@ -139,12 +141,15 @@ class XcodeProject:
         except Exception:
             return XcodeProject(project_path)
 
-    def write_cache(self, cache_folder: str) -> None:
+    def write_cache(self) -> None:
         """Write out this file to a cache
 
         :param cache_folder: The folder to store the cached project in.
         """
         self.populate_paths()
+
+        cache_folder = appdirs.user_cache_dir("xcodeproj")
+        os.makedirs(cache_folder, exist_ok=True)
 
         project_hash = hashlib.md5(
             pathlib.Path(os.path.join(self.path, "project.pbxproj")).read_bytes()
