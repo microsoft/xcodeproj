@@ -23,6 +23,7 @@ class PBXProductType(enum.Enum):
     static_library       = "com.apple.product-type.library.static"
     library_bundle       = "com.apple.product-type.library.bundle"
     framework            = "com.apple.product-type.framework"
+    static_framework     = "com.apple.product-type.framework.static"
     app_extension        = "com.apple.product-type.app-extension"
     watch_app2           = "com.apple.product-type.application.watchapp2"
     watch_app2_container = "com.apple.product-type.application.watchapp2-container"
