@@ -170,6 +170,7 @@ class PBXVariantGroup(PBXGroup):
 @deserialize.key("explicit_file_type", "explicitFileType")
 @deserialize.key("include_in_index", "includeInIndex")
 @deserialize.parser("fileEncoding", lambda x: int(x) if x else None)
+@deserialize.parser("wrapsLines", lambda x: {"0": False, "1": True}[x])
 @deserialize.downcast_identifier(PBXObject, "PBXFileReference")
 class PBXFileReference(PBXPathObject):
     """Represents a PBXFileReference.
@@ -182,6 +183,7 @@ class PBXFileReference(PBXPathObject):
     line_ending: Optional[str]
     indent_width: Optional[str]
     tab_width: Optional[str]
+    wraps_lines: Optional[bool]
     name: Optional[str]
     xc_language_specification_identifier: Optional[str]
     explicit_file_type: Optional[str]
