@@ -4,6 +4,7 @@ from typing import Any, cast, Dict, List, Optional
 
 import deserialize
 
+from .other import ProjectReference
 from .pathobjects import PBXGroup
 from .pbxobject import PBXObject
 from .targets import PBXTarget
@@ -33,6 +34,7 @@ class PBXProject(PBXObject):
     project_dir_path: str
     project_root: str
     target_ids: List[str]
+    project_references: Optional[List[ProjectReference]]
 
     @property
     def targets(self) -> List[PBXTarget]:

@@ -50,3 +50,11 @@ class PBXReferenceProxy(PBXObject):
     path: str
     remote_ref: str
     source_tree: str
+
+
+@deserialize.auto_snake()
+class ProjectReference:
+    """A reference to another project."""
+
+    product_group: str
+    project_ref: str
