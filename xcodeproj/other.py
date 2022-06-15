@@ -16,7 +16,8 @@ class PBXTargetDependency(PBXObject):
     """
 
     name: Optional[str]
-    target: str
+    platform_filter: Optional[str]
+    target: Optional[str]
     target_proxy: str
 
 
