@@ -97,7 +97,7 @@ class XcodeProject:
     _schemes: Optional[List[Scheme]]
     _is_populated: bool
 
-    def __init__(self, path: str) -> None:
+    def __init__(self, path: str, *, ignore_deserialization_errors: bool = False) -> None:
         self.path = path
         self.source_root = os.path.dirname(path)
         tree = _load_pbxproj_as_json(path)
@@ -109,7 +109,7 @@ class XcodeProject:
             **deserialize.deserialize(
                 Dict[str, PBXObject],
                 tree["objects"],
-                throw_on_unhandled=True,
+                throw_on_unhandled=not ignore_deserialization_errors,
                 raw_storage_mode=deserialize.RawStorageMode.all,
             )
         )
@@ -122,7 +122,7 @@ class XcodeProject:
         self._set_weak_refs()
 
     @staticmethod
-    def from_cache(project_path: str) -> "XcodeProject":
+    def from_cache(project_path: str, *, ignore_deserialization_errors: bool = False) -> "XcodeProject":
         """Attempt to load the project from a cached folder if possible.
 
         :param project_path: The path to the actual project (in case it's a cache miss)
@@ -139,7 +139,7 @@ class XcodeProject:
             with open(os.path.join(cache_folder, f"{project_hash}.dat"), "rb") as cached_file:
                 return pickle.load(cached_file)
         except Exception:
-            return XcodeProject(project_path)
+            return XcodeProject(project_path, ignore_deserialization_errors=ignore_deserialization_errors)
 
     def write_cache(self) -> None:
         """Write out this file to a cache
