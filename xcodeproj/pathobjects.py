@@ -169,6 +169,7 @@ class PBXVariantGroup(PBXGroup):
 @deserialize.key("xc_language_specification_identifier", "xcLanguageSpecificationIdentifier")
 @deserialize.key("explicit_file_type", "explicitFileType")
 @deserialize.key("include_in_index", "includeInIndex")
+@deserialize.key("wraps_lines", "wrapsLines")
 @deserialize.parser("fileEncoding", lambda x: int(x) if x else None)
 @deserialize.parser("wrapsLines", lambda x: {"0": False, "1": True}[x])
 @deserialize.downcast_identifier(PBXObject, "PBXFileReference")
