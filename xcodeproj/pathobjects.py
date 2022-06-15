@@ -171,7 +171,7 @@ class PBXVariantGroup(PBXGroup):
 @deserialize.key("include_in_index", "includeInIndex")
 @deserialize.key("wraps_lines", "wrapsLines")
 @deserialize.parser("fileEncoding", lambda x: int(x) if x else None)
-@deserialize.parser("wrapsLines", lambda x: {"0": False, "1": True}[x])
+@deserialize.parser("wrapsLines", lambda x: None if x is None else {"0": False, "1": True}[x])
 @deserialize.downcast_identifier(PBXObject, "PBXFileReference")
 class PBXFileReference(PBXPathObject):
     """Represents a PBXFileReference.
