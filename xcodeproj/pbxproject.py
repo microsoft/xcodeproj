@@ -50,3 +50,7 @@ class PBXProject(PBXObject):
     def build_configuration_list(self) -> XCConfigurationList:
         """Get the build configuration list for the project."""
         return cast(XCConfigurationList, self.objects()[self.build_configuration_list_id])
+
+    def find_target(self, id) -> PBXTarget:
+        """Find target by its id"""
+        return cast(PBXTarget, self.objects()[id])
