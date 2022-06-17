@@ -351,3 +351,12 @@ def test_pickling(one: xcodeproj.XcodeProject) -> None:
         assert one.objects == two.objects
     finally:
         os.remove(temp)
+
+def test_find_target_by_id(one: xcodeproj.XcodeProject) -> None:
+    """Test that find_target by id works.
+
+    :param one: The project
+    """
+    target = one.project.find_target("DD74C32525AF302A00C4A922")
+    assert target is not None
+    assert isinstance(target, PBXTarget)
