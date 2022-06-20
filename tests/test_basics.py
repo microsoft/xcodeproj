@@ -352,6 +352,7 @@ def test_pickling(one: xcodeproj.XcodeProject) -> None:
     finally:
         os.remove(temp)
 
+
 def test_find_target_by_id(one: xcodeproj.XcodeProject) -> None:
     """Test that find_target by id works.
 

@@ -51,7 +51,9 @@ from .targets import PBXAggregateTarget, PBXNativeTarget, PBXProductType, PBXTar
 from .xcobjects import XCBuildConfiguration, XCConfigurationList
 
 
+# pylint: disable=invalid-name
 PBXObjectType = TypeVar("PBXObjectType", bound=PBXObject)
+# pylint: enable=invalid-name
 
 
 def _load_pbxproj_as_json(path: str) -> Dict[str, Any]:
@@ -120,7 +122,9 @@ class XcodeProject:
         self._set_weak_refs()
 
     @staticmethod
-    def from_cache(project_path: str, *, ignore_deserialization_errors: bool = False) -> "XcodeProject":
+    def from_cache(
+        project_path: str, *, ignore_deserialization_errors: bool = False
+    ) -> "XcodeProject":
         """Attempt to load the project from a cached folder if possible.
 
         :param project_path: The path to the actual project (in case it's a cache miss)
@@ -137,7 +141,9 @@ class XcodeProject:
             with open(os.path.join(cache_folder, f"{project_hash}.dat"), "rb") as cached_file:
                 return pickle.load(cached_file)
         except Exception:
-            return XcodeProject(project_path, ignore_deserialization_errors=ignore_deserialization_errors)
+            return XcodeProject(
+                project_path, ignore_deserialization_errors=ignore_deserialization_errors
+            )
 
     def write_cache(self) -> None:
         """Write out this file to a cache

@@ -11,6 +11,7 @@ import requests
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.abspath(__file__), "..", "..")))
 import xcodeproj
 
+# pylint: disable=too-many-locals
 
 # Fixtures work by redefining names, so we need to disable this
 # pylint: disable=redefined-outer-name
@@ -32,10 +33,17 @@ def test_load_schemes() -> None:
 def test_remote_schemes() -> None:
     """Test schemes from some popular repositories."""
 
-    auth = (os.environ.get("GH_USERNAME"), os.environ.get("GH_PASSWORD"))
+    username = os.environ.get("GH_USERNAME")
 
-    if auth[0] is None or auth[1] is None:
+    if username is None:
         return
+
+    password = os.environ.get("GH_PASSWORD")
+
+    if password is None:
+        return
+
+    auth = (username, password)
 
     repos = [
         ("Alamofire", "Alamofire"),

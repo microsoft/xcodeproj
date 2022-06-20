@@ -16,18 +16,18 @@ class PBXProductType(enum.Enum):
     """The different product types available."""
 
     # fmt: off
-    application          = "com.apple.product-type.application"
-    bundle               = "com.apple.product-type.bundle"
-    uitesting_bundle     = "com.apple.product-type.bundle.ui-testing"
-    unit_test            = "com.apple.product-type.bundle.unit-test"
-    static_library       = "com.apple.product-type.library.static"
-    library_bundle       = "com.apple.product-type.library.bundle"
-    framework            = "com.apple.product-type.framework"
-    static_framework     = "com.apple.product-type.framework.static"
-    app_extension        = "com.apple.product-type.app-extension"
-    watch_app2           = "com.apple.product-type.application.watchapp2"
-    watch_app2_container = "com.apple.product-type.application.watchapp2-container"
-    watchkit2_extension  = "com.apple.product-type.watchkit2-extension"
+    APPLICATION          = "com.apple.product-type.application"
+    BUNDLE               = "com.apple.product-type.bundle"
+    UITESTING_BUNDLE     = "com.apple.product-type.bundle.ui-testing"
+    UNIT_TEST            = "com.apple.product-type.bundle.unit-test"
+    STATIC_LIBRARY       = "com.apple.product-type.library.static"
+    LIBRARY_BUNDLE       = "com.apple.product-type.library.bundle"
+    FRAMEWORK            = "com.apple.product-type.framework"
+    STATIC_FRAMEWORK     = "com.apple.product-type.framework.static"
+    APP_EXTENSION        = "com.apple.product-type.app-extension"
+    WATCH_APP2           = "com.apple.product-type.application.watchapp2"
+    WATCH_APP2_CONTAINER = "com.apple.product-type.application.watchapp2-container"
+    WATCHKIT2_EXTENSION  = "com.apple.product-type.watchkit2-extension"
     # fmt: on
 
 
