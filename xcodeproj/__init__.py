@@ -5,8 +5,6 @@ try:
 except ImportError:
     import pickle  # type: ignore
 
-from collections import defaultdict
-import functools
 import hashlib
 import json
 import os
@@ -49,7 +47,7 @@ from .pathobjects import (
 from .pbxproject import PBXProject
 from .other import PBXTargetDependency, PBXContainerItemProxy
 from .schemes import Scheme
-from .targets import PBXAggregateTarget, PBXNativeTarget, PBXProductType
+from .targets import PBXAggregateTarget, PBXNativeTarget, PBXProductType, PBXTarget
 from .xcobjects import XCBuildConfiguration, XCConfigurationList
 
 

@@ -359,4 +359,4 @@ def test_find_target_by_id(one: xcodeproj.XcodeProject) -> None:
     """
     target = one.project.find_target("DD74C32525AF302A00C4A922")
     assert target is not None
-    assert isinstance(target, PBXTarget)
+    assert isinstance(target, xcodeproj.PBXTarget)
