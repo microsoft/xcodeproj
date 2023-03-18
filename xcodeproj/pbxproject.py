@@ -35,6 +35,7 @@ class PBXProject(PBXObject):
     project_root: str
     target_ids: List[str]
     project_references: Optional[List[ProjectReference]]
+    package_references: Optional[List[str]]
 
     @property
     def targets(self) -> List[PBXTarget]:

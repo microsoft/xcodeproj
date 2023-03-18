@@ -170,6 +170,8 @@ class XcodeProject:
     def _set_weak_refs(self) -> None:
         """Setup the weak references."""
         for obj in self.objects.values():
+            if type(obj) is dict:
+                continue
             obj.objects_ref = weakref.ref(self.objects)
             obj.project_ref = weakref.ref(self)
 

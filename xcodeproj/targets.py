@@ -80,6 +80,7 @@ class PBXNativeTarget(PBXTarget):
     build_rule_ids: Optional[List[str]]
     product_reference_id: Optional[str]
     product_type: PBXProductType
+    package_product_dependencies: Optional[List[str]]
 
     @property
     def product_reference(self) -> Optional[PBXFileReference]:
