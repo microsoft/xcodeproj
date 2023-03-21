@@ -9,6 +9,7 @@ from .pathobjects import PBXFileReference
 
 
 @deserialize.key("file_ref_id", "fileRef")
+@deserialize.key("product_ref_id", "productRef")
 @deserialize.key("platform_filter", "platformFilter")
 @deserialize.downcast_identifier(PBXObject, "PBXBuildFile")
 class PBXBuildFile(PBXObject):
@@ -18,7 +19,8 @@ class PBXBuildFile(PBXObject):
     effectively pointers to a PBXFileReference which is an actual file.
     """
 
-    file_ref_id: str
+    file_ref_id: Optional[str]
+    product_ref_id: Optional[str]
     platform_filter: Optional[str]
     settings: Optional[Dict[str, Any]]
 
