@@ -59,3 +59,14 @@ class XCConfigurationList(PBXObject):
             cast(XCBuildConfiguration, self.objects()[build_configuration_id])
             for build_configuration_id in self.build_configuration_ids
         ]
+    
+@deserialize.key("product_name", "productName")
+@deserialize.downcast_identifier(PBXObject, "XCSwiftPackageProductDependency")
+class XCSwiftPackageProductDependency(PBXObject):
+    """Represents an XCSwiftPackageProductDependency.
+
+    This is a Swift package that the product depends on.
+    """
+
+    package: str
+    product_name: str
