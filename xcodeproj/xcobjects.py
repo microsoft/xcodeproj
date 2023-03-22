@@ -78,7 +78,7 @@ class XCSwiftPackageProductDependency(PBXObject):
 class XCRemoteSwiftPackageReference(PBXObject):
     """Represents an XCRemoteSwiftPackageReference.
 
-    This is a remote Swift package that added by the project.
+    This is a remote Swift package.
     """
 
     repository_url: str
