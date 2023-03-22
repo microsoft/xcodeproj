@@ -59,7 +59,8 @@ class XCConfigurationList(PBXObject):
             cast(XCBuildConfiguration, self.objects()[build_configuration_id])
             for build_configuration_id in self.build_configuration_ids
         ]
-    
+
+
 @deserialize.key("product_name", "productName")
 @deserialize.downcast_identifier(PBXObject, "XCSwiftPackageProductDependency")
 class XCSwiftPackageProductDependency(PBXObject):
@@ -70,3 +71,15 @@ class XCSwiftPackageProductDependency(PBXObject):
 
     package: str
     product_name: str
+
+
+@deserialize.key("repository_url", "repositoryURL")
+@deserialize.downcast_identifier(PBXObject, "XCRemoteSwiftPackageReference")
+class XCRemoteSwiftPackageReference(PBXObject):
+    """Represents an XCRemoteSwiftPackageReference.
+
+    This is a remote Swift package.
+    """
+
+    repository_url: str
+    requirement: Dict[str, Any]
