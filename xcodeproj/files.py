@@ -28,6 +28,10 @@ class PBXBuildFile(PBXObject):
     def file_ref(self) -> PBXFileReference:
         """Get the file reference.
 
+        :raises ValueError: If file_ref_id is None
+
         :returns: The file reference
         """
+        if self.file_ref_id is None:
+            raise ValueError("file_ref_id is None")
         return cast(PBXFileReference, self.objects()[self.file_ref_id])

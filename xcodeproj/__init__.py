@@ -1,7 +1,7 @@
 """Xcode project file management."""
 
 try:
-    import _pickle as pickle
+    import _pickle as pickle  # type: ignore
 except ImportError:
     import pickle  # type: ignore
 
@@ -187,7 +187,6 @@ class XcodeProject:
         cached_items: Dict[str, PBXObject] = {}
 
         for object_key, project_object in self.objects.items():
-
             if not isinstance(project_object, object_type):
                 continue
 
