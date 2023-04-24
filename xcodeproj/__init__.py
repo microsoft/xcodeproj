@@ -110,7 +110,7 @@ class XcodeProject:
                 Dict[str, PBXObject],
                 tree["objects"],
                 throw_on_unhandled=not ignore_deserialization_errors,
-                raw_storage_mode=deserialize.RawStorageMode.all,
+                raw_storage_mode=deserialize.RawStorageMode.ALL,
             )
         )
 
