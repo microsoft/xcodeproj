@@ -25,33 +25,26 @@ jobs:
   - script: curl -sSL https://install.python-poetry.org | python3 -
     displayName: Install Poetry
 
-  - script: python -m venv $(System.DefaultWorkingDirectory)
-    displayName: Create virtual environment
-
   - script: |
       $HOME/.local/bin/poetry install
     displayName: 'Install dependencies'
 
   - script: |
-      source bin/activate
-      python -m pylint --rcfile=pylintrc xcodeproj
-      python -m pylint --rcfile=pylintrc tests
+      $HOME/.local/bin/poetry run pylint --rcfile=pylintrc xcodeproj
+      $HOME/.local/bin/poetry run pylint --rcfile=pylintrc tests
     displayName: 'Lint'
 
   - script: |
-      source bin/activate
-      python -m mypy --ignore-missing-imports xcodeproj/
-      python -m mypy --ignore-missing-imports tests/
+      $HOME/.local/bin/poetry run mypy --ignore-missing-imports xcodeproj/
+      $HOME/.local/bin/poetry run mypy --ignore-missing-imports tests/
     displayName: 'Type Check'
 
   - script: |
-      source bin/activate
-      python -m pytest tests --cov=xcodeproj --cov-report html --cov-report xml --doctest-modules --junitxml=junit/test-results.xml
+      $HOME/.local/bin/poetry run pytest tests --cov=xcodeproj --cov-report html --cov-report xml --doctest-modules --junitxml=junit/test-results.xml
     displayName: 'pytest'
 
   - script: |
-      source bin/activate
-      python inlinecss.py htmlcov
+      $HOME/.local/bin/poetry run python inlinecss.py htmlcov
     displayName: 'Inline CSS'
 
   - task: PublishTestResults@2
