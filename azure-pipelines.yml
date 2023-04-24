@@ -29,7 +29,7 @@ jobs:
     displayName: Create virtual environment
 
   - script: |
-      poetry install
+      $HOME/.local/bin/poetry install
     displayName: 'Install dependencies'
 
   - script: |
