@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "xcodeproj"
-version = "1.1.0"
+version = "2.0.0"
 description = "A utility for interacting with Xcode's xcodeproj bundle format."
 
 license = "MIT"
