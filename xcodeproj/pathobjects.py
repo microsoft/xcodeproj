@@ -35,7 +35,10 @@ class PBXPathObject(PBXObject):
             hasattr(self, "_parent_group_reference")
             and getattr(self, "_parent_group_reference") is not None
         ):
-            return cast(PBXGroup, self.project().objects[getattr(self, "_parent_group_reference")])
+            return cast(
+                PBXGroup,
+                self.project().objects[getattr(self, "_parent_group_reference")],
+            )
 
         for group in self.project().fetch_type(PBXGroup).values():
             if self in group.children:
@@ -78,6 +81,11 @@ class PBXPathObject(PBXObject):
             setattr(self, "_relative_path", self.path)
             return cast(str, self.path)
 
+        if self.source_tree == "<absolute>":
+            if not self.path.startswith(os.sep):
+                setattr(self, "_relative_path", self.path)
+            return self.path
+
         if self.source_tree != "<group>":
             if self.source_tree in ["BUILT_PRODUCTS_DIR", "SDKROOT", "DEVELOPER_DIR"]:
                 return f"$({self.source_tree})"
@@ -115,6 +123,9 @@ class PBXPathObject(PBXObject):
 
         if path is None:
             return None
+
+        if path.startswith("/"):
+            return path
 
         return os.path.join(self.project().source_root, path)
 
