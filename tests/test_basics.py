@@ -110,8 +110,8 @@ def test_get_paths(one: xcodeproj.XcodeProject, two: xcodeproj.XcodeProject) -> 
         "Carthage/Build/CocoaLumberjack.xcframework",
         "wat WatchKit Extension/NotificationController.swift",
         "CLJTest/AppDelegate.swift",
-        "$(BUILT_PRODUCTS_DIR)",
-        "$(BUILT_PRODUCTS_DIR)",
+        "wat WatchKit Extension.appex",
+        "CLJTest.app",
         "CLJTest/Base.lproj/LaunchScreen.storyboard",
         "wat WatchKit App/Base.lproj/Interface.storyboard",
         "wat WatchKit Extension/Assets.xcassets",
@@ -120,14 +120,21 @@ def test_get_paths(one: xcodeproj.XcodeProject, two: xcodeproj.XcodeProject) -> 
         "wat WatchKit Extension/PushNotificationPayload.apns",
         "CLJTest/ViewController.swift",
         "wat WatchKit Extension/ExtensionDelegate.swift",
-        "$(BUILT_PRODUCTS_DIR)",
+        "wat.app",
         "CLJTest/Base.lproj/Main.storyboard",
-        "$(BUILT_PRODUCTS_DIR)",
+        "wat WatchKit App.app",
     ]
 
     for index, item in enumerate(one.fetch_type(xcodeproj.PBXFileReference).values()):
         assert item.relative_path() == expected[index]
-        assert item.absolute_path() == os.path.join(COLLATERAL_PATH, expected[index])
+        absolute_path = item.absolute_path()
+
+        assert absolute_path is not None
+
+        if absolute_path.startswith("$(BUILT_PRODUCTS_DIR)/"):
+            assert absolute_path == "$(BUILT_PRODUCTS_DIR)/" + expected[index]
+        else:
+            assert absolute_path == os.path.join(COLLATERAL_PATH, expected[index])
 
     groups = [
         "wat WatchKit App",
@@ -182,8 +189,8 @@ def test_get_paths_prepopulated(one: xcodeproj.XcodeProject, two: xcodeproj.Xcod
         "Carthage/Build/CocoaLumberjack.xcframework",
         "wat WatchKit Extension/NotificationController.swift",
         "CLJTest/AppDelegate.swift",
-        "$(BUILT_PRODUCTS_DIR)",
-        "$(BUILT_PRODUCTS_DIR)",
+        "wat WatchKit Extension.appex",
+        "CLJTest.app",
         "CLJTest/Base.lproj/LaunchScreen.storyboard",
         "wat WatchKit App/Base.lproj/Interface.storyboard",
         "wat WatchKit Extension/Assets.xcassets",
@@ -192,14 +199,21 @@ def test_get_paths_prepopulated(one: xcodeproj.XcodeProject, two: xcodeproj.Xcod
         "wat WatchKit Extension/PushNotificationPayload.apns",
         "CLJTest/ViewController.swift",
         "wat WatchKit Extension/ExtensionDelegate.swift",
-        "$(BUILT_PRODUCTS_DIR)",
+        "wat.app",
         "CLJTest/Base.lproj/Main.storyboard",
-        "$(BUILT_PRODUCTS_DIR)",
+        "wat WatchKit App.app",
     ]
 
     for index, item in enumerate(one.fetch_type(xcodeproj.PBXFileReference).values()):
         assert item.relative_path() == expected[index]
-        assert item.absolute_path() == os.path.join(COLLATERAL_PATH, expected[index])
+        absolute_path = item.absolute_path()
+
+        assert absolute_path is not None
+
+        if absolute_path.startswith("$(BUILT_PRODUCTS_DIR)/"):
+            assert absolute_path == "$(BUILT_PRODUCTS_DIR)/" + expected[index]
+        else:
+            assert absolute_path == os.path.join(COLLATERAL_PATH, expected[index])
 
     groups = [
         "wat WatchKit App",
@@ -230,6 +244,13 @@ def test_get_paths_prepopulated(one: xcodeproj.XcodeProject, two: xcodeproj.Xcod
         else:
             assert version_group.relative_path() is None
             assert version_group.absolute_path() is None
+
+    reference_proxy_expectations = [("BUILT_PRODUCTS_DIR", "SomeTest.framework")]
+
+    for index, proxy in enumerate(two.fetch_type(xcodeproj.PBXReferenceProxy).values()):
+        expected_root, expected_relative = reference_proxy_expectations[index]
+        assert proxy.relative_path() == expected_relative
+        assert proxy.absolute_path() == os.path.join(f"$({expected_root})", expected_relative)
 
 
 def test_get_parents(two: xcodeproj.XcodeProject) -> None:

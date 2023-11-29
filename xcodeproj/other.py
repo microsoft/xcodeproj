@@ -38,21 +38,6 @@ class PBXContainerItemProxy(PBXObject):
 
 
 @deserialize.auto_snake()
-@deserialize.downcast_identifier(PBXObject, "PBXReferenceProxy")
-class PBXReferenceProxy(PBXObject):
-    """Represents a PBXReferenceProxy.
-
-    It's not clear what this one is. As far as I can tell, it references
-    something in another project in the same workspace.
-    """
-
-    file_type: str
-    path: str
-    remote_ref: str
-    source_tree: str
-
-
-@deserialize.auto_snake()
 class ProjectReference:
     """A reference to another project."""
 
