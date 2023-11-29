@@ -142,7 +142,8 @@ class XcodeProject:
                 return pickle.load(cached_file)
         except Exception:
             return XcodeProject(
-                project_path, ignore_deserialization_errors=ignore_deserialization_errors
+                project_path,
+                ignore_deserialization_errors=ignore_deserialization_errors,
             )
 
     def write_cache(self) -> None:
@@ -194,6 +195,35 @@ class XcodeProject:
 
         self._cached_items[object_type.__name__] = cached_items
 
+    def _populate(
+        self,
+        parent_group: PBXPathObject,
+        path: Optional[str],
+        non_set: list[PBXPathObject],
+    ) -> None:
+        if path is not None:
+            setattr(parent_group, "_relative_path", path)
+
+        if not isinstance(parent_group, PBXGroup):
+            return
+
+        for subgroup in parent_group.children:
+            if subgroup.source_tree == "SOURCE_ROOT":
+                self._populate(subgroup, subgroup.path, non_set)
+            elif subgroup.source_tree == "<group>":
+                if subgroup.path is None:
+                    if path is None:
+                        self._populate(subgroup, path, non_set)
+                    else:
+                        non_set.append(subgroup)
+                else:
+                    if path is not None:
+                        self._populate(subgroup, os.path.join(path, subgroup.path), non_set)
+                    else:
+                        self._populate(subgroup, subgroup.path, non_set)
+            else:
+                non_set.append(subgroup)
+
     def populate_paths(self) -> None:
         """Pre-emptively populate group paths.
 
@@ -205,34 +235,8 @@ class XcodeProject:
 
         non_set = []
 
-        def populate(parent_group: PBXPathObject, path: Optional[str]) -> None:
-            nonlocal non_set
-
-            if path is not None:
-                setattr(parent_group, "_relative_path", path)
-
-            if not isinstance(parent_group, PBXGroup):
-                return
-
-            for subgroup in parent_group.children:
-                if subgroup.source_tree == "SOURCE_ROOT":
-                    populate(subgroup, subgroup.path)
-                elif subgroup.source_tree == "<group>":
-                    if subgroup.path is None:
-                        if path is None:
-                            populate(subgroup, path)
-                        else:
-                            non_set.append(subgroup)
-                    else:
-                        if path is not None:
-                            populate(subgroup, os.path.join(path, subgroup.path))
-                        else:
-                            populate(subgroup, subgroup.path)
-                else:
-                    non_set.append(subgroup)
-
         root_group = self.objects[self.project.main_group_id]
-        populate(root_group, None)
+        self._populate(root_group, None, non_set)
 
         for item in non_set:
             _ = item.relative_path()
