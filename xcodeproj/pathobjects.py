@@ -82,13 +82,13 @@ class PBXPathObject(PBXObject):
             return cast(str, self.path)
 
         if self.source_tree == "<absolute>":
-            if not self.path.startswith(os.sep):
+            if self.path and not self.path.startswith(os.sep):
                 setattr(self, "_relative_path", self.path)
             return self.path
 
         if self.source_tree != "<group>":
             if self.source_tree in ["BUILT_PRODUCTS_DIR", "SDKROOT", "DEVELOPER_DIR"]:
-                return f"$({self.source_tree})"
+                return self.path
             raise Exception(f"Unexpected source tree: {self.source_tree}")
 
         parent = self.parent_group()
@@ -126,6 +126,12 @@ class PBXPathObject(PBXObject):
 
         if path.startswith("/"):
             return path
+
+        if self.source_tree in ["BUILT_PRODUCTS_DIR", "SDKROOT", "DEVELOPER_DIR"]:
+            if self.path:
+                return os.path.join(f"$({self.source_tree})", self.path)
+
+            return f"$({self.source_tree})"
 
         return os.path.join(self.project().source_root, path)
 
@@ -223,3 +229,18 @@ class XCVersionGroup(PBXPathObject):
         :returns: The children for this group
         """
         return [cast(PBXPathObject, self.objects()[child_id]) for child_id in self.child_ids]
+
+
+@deserialize.auto_snake()
+@deserialize.downcast_identifier(PBXObject, "PBXReferenceProxy")
+class PBXReferenceProxy(PBXPathObject):
+    """Represents a PBXReferenceProxy.
+
+    It's not clear what this one is. As far as I can tell, it references
+    something in another project in the same workspace.
+    """
+
+    file_type: str
+    path: str
+    remote_ref: str
+    source_tree: str

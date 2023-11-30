@@ -43,6 +43,7 @@ from .pathobjects import (
     PBXVariantGroup,
     PBXFileReference,
     XCVersionGroup,
+    PBXReferenceProxy,
 )
 from .pbxproject import PBXProject
 from .other import PBXTargetDependency, PBXContainerItemProxy
@@ -233,7 +234,7 @@ class XcodeProject:
         if self._is_populated:
             return
 
-        non_set = []
+        non_set: list[PBXPathObject] = []
 
         root_group = self.objects[self.project.main_group_id]
         self._populate(root_group, None, non_set)

@@ -41,6 +41,13 @@
 			remoteGlobalIDString = DD624D2E25B05EEE0081F68F;
 			remoteInfo = "wat WatchKit Extension";
 		};
+		07231F3E207DA2FF007D566D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = NOTAREALREFERENCE /* SomeOtherProject.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 67A017B82069820500472EB6;
+			remoteInfo = Sometest;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -128,6 +135,7 @@
 		DD62471925AF30980081F68F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				07231F3F207DA2FF007D566D /* SomeTest.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -330,6 +338,16 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		07231F3F207DA2FF007D566D /* SomeTest.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = SomeTest.framework;
+			remoteRef = 07231F3E207DA2FF007D566D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		DD624D1B25B05EED0081F68F /* Resources */ = {
