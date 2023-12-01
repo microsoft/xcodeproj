@@ -60,13 +60,13 @@ def test_targets(one: xcodeproj.XcodeProject) -> None:
     targets = one.targets()
     assert len(targets) == 4
 
-    watch_extension = targets[0]
-    assert watch_extension.product_name == "wat WatchKit Extension"
-    assert watch_extension.object_key == "DD624D2E25B05EEE0081F68F"
-
-    cljtest = targets[1]
+    cljtest = targets[0]
     assert cljtest.product_name == "CLJTest"
     assert cljtest.object_key == "DD74C32525AF302A00C4A922"
+
+    watch_extension = targets[1]
+    assert watch_extension.product_name == "wat WatchKit Extension"
+    assert watch_extension.object_key == "DD624D2E25B05EEE0081F68F"
 
     watch_app = targets[2]
     assert watch_app.product_name == "wat WatchKit App"
@@ -98,7 +98,7 @@ def test_get_paths(one: xcodeproj.XcodeProject, two: xcodeproj.XcodeProject) -> 
     :param two: A different project
     """
 
-    expected = [
+    expected_paths = [
         "wat WatchKit App/Info.plist",
         "wat WatchKit Extension/ComplicationController.swift",
         "wat WatchKit Extension/InterfaceController.swift",
@@ -123,20 +123,27 @@ def test_get_paths(one: xcodeproj.XcodeProject, two: xcodeproj.XcodeProject) -> 
         "wat.app",
         "CLJTest/Base.lproj/Main.storyboard",
         "wat WatchKit App.app",
+        "Foo.swift",
+        "Bar.swift",
     ]
 
-    for index, item in enumerate(one.fetch_type(xcodeproj.PBXFileReference).values()):
-        assert item.relative_path() == expected[index]
-        absolute_path = item.absolute_path()
+    expected_paths.sort()
+
+    found_items = list(one.fetch_type(xcodeproj.PBXFileReference).values())
+    found_items.sort(key=lambda x: x.relative_path() or "")
+
+    for expected, found in zip(expected_paths, found_items):
+        assert expected == found.relative_path()
+        absolute_path = found.absolute_path()
 
         assert absolute_path is not None
 
         if absolute_path.startswith("$(BUILT_PRODUCTS_DIR)/"):
-            assert absolute_path == "$(BUILT_PRODUCTS_DIR)/" + expected[index]
+            assert absolute_path == "$(BUILT_PRODUCTS_DIR)/" + expected
         else:
-            assert absolute_path == os.path.join(COLLATERAL_PATH, expected[index])
+            assert absolute_path == os.path.join(COLLATERAL_PATH, expected)
 
-    groups = [
+    groups: list[str | None] = [
         "wat WatchKit App",
         None,
         "CLJTest",
@@ -147,14 +154,19 @@ def test_get_paths(one: xcodeproj.XcodeProject, two: xcodeproj.XcodeProject) -> 
         None,
         "wat WatchKit Extension",
         "wat WatchKit Extension",
+        None,  # FakeFolder
     ]
 
-    for index, group in enumerate(one.fetch_type(xcodeproj.PBXGroup).values()):
-        value = groups[index]
-        assert group.relative_path() == value
-        if value is None:
+    groups.sort(key=lambda x: x or "")
+
+    found_groups = list(one.fetch_type(xcodeproj.PBXGroup).values())
+    found_groups.sort(key=lambda x: x.relative_path() or "")
+
+    for expected_group, found_group in zip(groups, found_groups):
+        assert found_group.relative_path() == expected_group
+        if expected_group is None:
             continue
-        assert group.absolute_path() == os.path.join(COLLATERAL_PATH, value)
+        assert found_group.absolute_path() == os.path.join(COLLATERAL_PATH, expected_group)
 
     for index, version_group in enumerate(two.fetch_type(xcodeproj.XCVersionGroup).values()):
         if index == 0:
@@ -167,17 +179,15 @@ def test_get_paths(one: xcodeproj.XcodeProject, two: xcodeproj.XcodeProject) -> 
             assert version_group.absolute_path() is None
 
 
-def test_get_paths_prepopulated(one: xcodeproj.XcodeProject, two: xcodeproj.XcodeProject) -> None:
+def test_get_paths_prepopulated_1(one: xcodeproj.XcodeProject) -> None:
     """Test that path determination works
 
     :param one: The project
-    :param two: A different project
     """
 
     one.populate_paths()
-    two.populate_paths()
 
-    expected = [
+    expected_paths = [
         "wat WatchKit App/Info.plist",
         "wat WatchKit Extension/ComplicationController.swift",
         "wat WatchKit Extension/InterfaceController.swift",
@@ -202,20 +212,27 @@ def test_get_paths_prepopulated(one: xcodeproj.XcodeProject, two: xcodeproj.Xcod
         "wat.app",
         "CLJTest/Base.lproj/Main.storyboard",
         "wat WatchKit App.app",
+        "Foo.swift",
+        "Bar.swift",
     ]
 
-    for index, item in enumerate(one.fetch_type(xcodeproj.PBXFileReference).values()):
-        assert item.relative_path() == expected[index]
-        absolute_path = item.absolute_path()
+    expected_paths.sort()
+
+    found_items = list(one.fetch_type(xcodeproj.PBXFileReference).values())
+    found_items.sort(key=lambda x: x.relative_path() or "")
+
+    for expected, found in zip(expected_paths, found_items):
+        assert expected == found.relative_path()
+        absolute_path = found.absolute_path()
 
         assert absolute_path is not None
 
         if absolute_path.startswith("$(BUILT_PRODUCTS_DIR)/"):
-            assert absolute_path == "$(BUILT_PRODUCTS_DIR)/" + expected[index]
+            assert absolute_path == "$(BUILT_PRODUCTS_DIR)/" + expected
         else:
-            assert absolute_path == os.path.join(COLLATERAL_PATH, expected[index])
+            assert absolute_path == os.path.join(COLLATERAL_PATH, expected)
 
-    groups = [
+    groups: list[str | None] = [
         "wat WatchKit App",
         None,
         "CLJTest",
@@ -226,14 +243,28 @@ def test_get_paths_prepopulated(one: xcodeproj.XcodeProject, two: xcodeproj.Xcod
         None,
         "wat WatchKit Extension",
         "wat WatchKit Extension",
+        None,  # FakeFolder
     ]
 
-    for index, group in enumerate(one.fetch_type(xcodeproj.PBXGroup).values()):
-        value = groups[index]
-        assert group.relative_path() == value
-        if value is None:
+    groups.sort(key=lambda x: x or "")
+
+    found_groups = list(one.fetch_type(xcodeproj.PBXGroup).values())
+    found_groups.sort(key=lambda x: x.relative_path() or "")
+
+    for expected_group, found_group in zip(groups, found_groups):
+        assert found_group.relative_path() == expected_group
+        if expected_group is None:
             continue
-        assert group.absolute_path() == os.path.join(COLLATERAL_PATH, value)
+        assert found_group.absolute_path() == os.path.join(COLLATERAL_PATH, expected_group)
+
+
+def test_get_paths_prepopulated_2(two: xcodeproj.XcodeProject) -> None:
+    """Test that path determination works
+
+    :param two: A project
+    """
+
+    two.populate_paths()
 
     for index, version_group in enumerate(two.fetch_type(xcodeproj.XCVersionGroup).values()):
         if index == 0:
@@ -328,6 +359,7 @@ def test_file_paths(one: xcodeproj.XcodeProject) -> None:
             "DD74C31D25AF302A00C4A922",  # Root of the project
             "DD74C32725AF302A00C4A922",  # Products
             "DD62471925AF30980081F68F",  # Frameworks
+            "DD74C32825AF302A00C99999",  # FakeFolder
         ]:
             continue
 
