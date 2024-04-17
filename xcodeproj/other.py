@@ -41,5 +41,5 @@ class PBXContainerItemProxy(PBXObject):
 class ProjectReference:
     """A reference to another project."""
 
-    product_group: str
+    product_group: Optional[str]
     project_ref: str
