@@ -44,9 +44,14 @@ from .pathobjects import (
     PBXFileReference,
     XCVersionGroup,
     PBXReferenceProxy,
+    PBXFileSystemSynchronizedRootGroup,
 )
 from .pbxproject import PBXProject
-from .other import PBXTargetDependency, PBXContainerItemProxy
+from .other import (
+    PBXTargetDependency,
+    PBXContainerItemProxy,
+    PBXFileSystemSynchronizedBuildFileExceptionSet,
+)
 from .schemes import Scheme
 from .targets import PBXAggregateTarget, PBXNativeTarget, PBXProductType, PBXTarget
 from .xcobjects import XCBuildConfiguration, XCConfigurationList
