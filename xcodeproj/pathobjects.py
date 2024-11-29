@@ -244,3 +244,20 @@ class PBXReferenceProxy(PBXPathObject):
     path: str
     remote_ref: str
     source_tree: str
+
+
+@deserialize.auto_snake()
+@deserialize.key("explicit_file_types", "explicitFileTypes")
+@deserialize.key("explicit_folders", "explicitFolders")
+@deserialize.key("exception_ids", "exceptions")
+@deserialize.downcast_identifier(PBXObject, "PBXFileSystemSynchronizedRootGroup")
+class PBXFileSystemSynchronizedRootGroup(PBXPathObject):
+    """Represents a PBXFileSystemSynchronizedRootGroup.
+
+    A new feature in Xcode 16. It follows a group of files on disk to try and
+    reduce merge conflicts in the pbxproj.
+    """
+
+    exception_ids: List[str]
+    explicit_file_types: dict[str, str]
+    explicit_folders: List[str]
