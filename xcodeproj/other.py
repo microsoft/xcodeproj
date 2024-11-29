@@ -1,6 +1,6 @@
 """PBX object types"""
 
-from typing import Optional
+from typing import List, Optional
 
 import deserialize
 
@@ -43,3 +43,17 @@ class ProjectReference:
 
     product_group: str
     project_ref: str
+
+
+@deserialize.auto_snake()
+@deserialize.key("membership_exceptions", "membershipExceptions")
+@deserialize.downcast_identifier(PBXObject, "PBXFileSystemSynchronizedBuildFileExceptionSet")
+class PBXFileSystemSynchronizedBuildFileExceptionSet(PBXObject):
+    """Represents a PBXFileSystemSynchronizedBuildFileExceptionSet.
+
+    A new feature in Xcode 16. It follows a group of files on disk to try and
+    reduce merge conflicts in the pbxproj.
+    """
+
+    membership_exceptions: List[str]
+    target: str
