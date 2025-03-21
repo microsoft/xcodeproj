@@ -420,6 +420,9 @@ class TestAction(Action):
         self.only_generate_coverage_for_specific_targets = (
             node.attrib.pop("onlyGenerateCoverageForSpecifiedTargets", None) == "YES"
         )
+        self.should_autocreate_test_plan = (
+            node.attrib.pop("shouldAutocreateTestPlan", None) == "YES"
+        )
         self.test_plans = []
         self.testables = []
         self.code_coverage_targets = None
