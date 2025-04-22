@@ -36,6 +36,8 @@ class PBXProject(PBXObject):
     target_ids: List[str]
     project_references: Optional[List[ProjectReference]]
     package_references: Optional[List[str]]
+    minimized_project_reference_proxies: Optional[str]
+    preferred_project_object_version: Optional[str]
 
     @property
     def targets(self) -> List[PBXTarget]:
