@@ -82,6 +82,8 @@
 		DD62471C25AF30BD0081F68F /* CLJTest-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CLJTest-Bridging-Header.h"; sourceTree = "<group>"; };
 		DD62471D25AF30BE0081F68F /* test.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = test.m; sourceTree = "<group>"; };
 		DD624D1825B05ED30081F68F /* CocoaLumberjack.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = CocoaLumberjack.xcframework; path = Carthage/Build/CocoaLumberjack.xcframework; sourceTree = SOURCE_ROOT; };
+		DD624D1825B05ED300899999 /* Foo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Foo.swift; sourceTree = "<group>"; };
+		99999D1825B05ED300899999 /* Bar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bar.swift; sourceTree = "<group>"; };
 		DD624D1D25B05EED0081F68F /* wat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = wat.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD624D2025B05EED0081F68F /* wat WatchKit App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "wat WatchKit App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD624D2625B05EED0081F68F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
@@ -163,6 +165,7 @@
 				DD624D3325B05EEE0081F68F /* wat WatchKit Extension */,
 				DD74C32725AF302A00C4A922 /* Products */,
 				DD62471925AF30980081F68F /* Frameworks */,
+				DD74C32825AF302A00C99999 /* FakeFolder */,
 			);
 			sourceTree = "<group>";
 		};
@@ -192,6 +195,14 @@
 				DD62471C25AF30BD0081F68F /* CLJTest-Bridging-Header.h */,
 			);
 			path = CLJTest;
+			sourceTree = "<group>";
+		};
+		DD74C32825AF302A00C99999 /* FakeFolder */ = {
+			isa = PBXGroup;
+			children = (
+				DD624D1825B05ED300899999 /* Foo.swift */,
+				99999D1825B05ED300899999 /* Bar.swift */,
+			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
