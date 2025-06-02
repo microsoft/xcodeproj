@@ -388,6 +388,7 @@ class BuildAction(Action):
         self.build_implicit_dependencies = (
             node.attrib.pop("buildImplicitDependencies", None) == "YES"
         )
+        self.build_architectures = node.attrib.pop("buildArchitectures", None)
         self.build_action_entries = []
         assert len(node.attrib) == 0, f"Unhandled attributes: {list(node.attrib.keys())}"
 
