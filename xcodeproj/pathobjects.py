@@ -98,15 +98,15 @@ class PBXPathObject(PBXObject):
 
         parent_path = parent.relative_path()
 
-        if self.path is None:
+        if parent_path is None:
+            setattr(self, "_relative_path", self.path or self.name)
+            return self.path or self.name
+
+        if self.path is None and self.name is None:
             setattr(self, "_relative_path", parent_path)
             return parent_path
 
-        if parent_path is None:
-            setattr(self, "_relative_path", self.path)
-            return self.path
-
-        value = os.path.join(parent_path, self.path)
+        value = os.path.join(parent_path, self.path or self.name)
         setattr(self, "_relative_path", value)
 
         return value
