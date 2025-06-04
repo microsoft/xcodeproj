@@ -94,6 +94,7 @@ class PBXPathObject(PBXObject):
         parent = self.parent_group()
 
         if not parent:
+            # If there is no parent, then we are in the root group.
             return None
 
         parent_path = parent.relative_path()
