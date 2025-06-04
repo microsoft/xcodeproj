@@ -20,7 +20,7 @@ class PBXPathObject(PBXObject):
     source_tree: str
 
     _parent_group_reference: Optional[str]
-    _full_path: Optional[str]
+    _relative_path: Optional[str]
 
     def parent_group(self) -> Optional["PBXGroup"]:
         """Find the parent group of a reference.
@@ -40,20 +40,17 @@ class PBXPathObject(PBXObject):
                 self.project().objects[getattr(self, "_parent_group_reference")],
             )
 
-        for group in self.project().fetch_type(PBXGroup).values():
-            if self in group.children:
-                setattr(self, "_parent_group_reference", group.object_key)
-                return group
+        group_types_to_check = [
+            PBXGroup,
+            PBXVariantGroup,
+            XCVersionGroup,
+        ]
 
-        for group in self.project().fetch_type(PBXVariantGroup).values():
-            if self in group.children:
-                setattr(self, "_parent_group_reference", group.object_key)
-                return group
-
-        for group in self.project().fetch_type(XCVersionGroup).values():
-            if self in group.children:
-                setattr(self, "_parent_group_reference", group.object_key)
-                return group
+        for group_type in group_types_to_check:
+            for group in self.project().fetch_type(group_type).values():
+                if self in group.children:
+                    setattr(self, "_parent_group_reference", group.object_key)
+                    return group
 
         return None
 
@@ -72,18 +69,23 @@ class PBXPathObject(PBXObject):
 
         # pylint: disable=too-many-return-statements
 
-        if hasattr(self, "_relative_path"):
-            cached_path = getattr(self, "_relative_path")
-            if cached_path is not None:
-                return cast(str, cached_path)
+        if hasattr(self, "_relative_path") and self._relative_path is not None:
+            return self._relative_path
 
         if self.source_tree == "SOURCE_ROOT":
             setattr(self, "_relative_path", self.path)
             return cast(str, self.path)
 
         if self.source_tree == "<absolute>":
-            if self.path and not self.path.startswith(os.sep):
-                setattr(self, "_relative_path", self.path)
+            if self.path:
+                if not self.path.startswith(os.sep):
+                    setattr(self, "_relative_path", self.path)
+                else:
+                    raise Exception("Unexpected state. Please file an issue on GitHub.")
+            else:
+                raise Exception(
+                    "Unexpected state. PBXPathObject with <absolute> source tree has no path. Please file an issue on GitHub."
+                )
             return self.path
 
         if self.source_tree != "<group>":
@@ -91,26 +93,75 @@ class PBXPathObject(PBXObject):
                 return self.path
             raise Exception(f"Unexpected source tree: {self.source_tree}")
 
+        # Ok, it now gets incredible hairy. Essentially, a file has either its own path, or it has
+        # a path relative to its parent. However, the parent may not have a path and be "virtual".
+        # In that case, we need to determine the grandparent's path to use as the base. This is a
+        # recursive process. Once we get to the root, we can't make any assumptions, so assume the
+        # relative path to be the empty string.
+
         parent = self.parent_group()
 
         if not parent:
-            return None
+            base_path_for_self = ""
+        else:
+            parent_folder_path = parent.relative_path()
+            if parent_folder_path is None:
+                # If there's no parent relative path, then we have no path relative to anything else
+                base_path_for_self = ""
+            elif parent.path is not None:
+                # If there is a parent path and , we use it as the base path
+                base_path_for_self = parent_folder_path
+            else:
+                # Parent is a "virtual" group (no 'path' attribute)
+                child_path_includes_virtual_parent_name = False
 
-        parent_path = parent.relative_path()
+                # Check if the child's path includes the parent's name
+                if parent.name and self.path:
+                    if self.path == parent.name or self.path.startswith(parent.name + os.sep):
+                        child_path_includes_virtual_parent_name = True
 
-        if parent_path is None:
-            setattr(self, "_relative_path", self.path or self.name)
-            return self.path or self.name
+                # If the child's path includes the parent's name, we need to determine
+                # the base path for this child.
+                if child_path_includes_virtual_parent_name:
+                    # Child's path (e.g., "VirtualGroupName/File.swift") already includes the virtual parent's name.
+                    # So, the base path for this child is the parent's container (grandparent's folder).
+                    grandparent = parent.parent_group()
+                    if not grandparent or grandparent.relative_path() is None:
+                        # Virtual parent is main group or orphan. Either way, its container is effectively root.
+                        base_path_for_self = ""
+                    else:
+                        base_path_for_self = grandparent.relative_path()
+                else:
+                    # Parent is virtual, but child's path does not start with parent's name
+                    # (e.g., parent "Commands", child path "MyFile.swift").
+                    # So, child is inside the folder conceptually represented by the virtual parent.
+                    base_path_for_self = parent_folder_path
 
-        if self.path is None and self.name is None:
-            setattr(self, "_relative_path", parent_path)
-            return parent_path
+        # Determine the path segment contributed by this object itself
+        if isinstance(self, PBXGroup):
+            # For a group, if it's the main group and has no path/name, it contributes nothing.
+            if (
+                self.project().project.main_group_id == self.object_key
+                and not self.path
+                and not self.name
+            ):
+                current_segment_from_self = None
+            else:
+                current_segment_from_self = self.path or self.name
+        else:  # PBXFileReference or other similar types
+            current_segment_from_self = self.path
 
-        value = os.path.join(parent_path, self.path or self.name)
-        setattr(self, "_relative_path", value)
+        if current_segment_from_self is None:
+            calculated_path = base_path_for_self
+        else:
+            if base_path_for_self == "" and current_segment_from_self.startswith(os.sep):
+                # Avoid os.path.join("", "/abs/path") becoming "//abs/path"
+                calculated_path = current_segment_from_self
+            else:
+                calculated_path = os.path.join(base_path_for_self, current_segment_from_self)
 
-        return value
-
+        setattr(self, "_relative_path", calculated_path)
+        return calculated_path
         # pylint: enable=too-many-return-statements
 
     def absolute_path(self) -> Optional[str]:

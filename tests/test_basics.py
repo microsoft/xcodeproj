@@ -112,8 +112,8 @@ def test_get_paths(one: xcodeproj.XcodeProject, two: xcodeproj.XcodeProject) -> 
         "CLJTest/AppDelegate.swift",
         "wat WatchKit Extension.appex",
         "CLJTest.app",
-        "CLJTest/Base.lproj/LaunchScreen.storyboard",
-        "wat WatchKit App/Base.lproj/Interface.storyboard",
+        "CLJTest/LaunchScreen.storyboard/Base.lproj/LaunchScreen.storyboard",
+        "wat WatchKit App/Interface.storyboard/Base.lproj/Interface.storyboard",
         "wat WatchKit Extension/Assets.xcassets",
         "CLJTest/Assets.xcassets",
         "CLJTest/test.m",
@@ -121,7 +121,7 @@ def test_get_paths(one: xcodeproj.XcodeProject, two: xcodeproj.XcodeProject) -> 
         "CLJTest/ViewController.swift",
         "wat WatchKit Extension/ExtensionDelegate.swift",
         "wat.app",
-        "CLJTest/Base.lproj/Main.storyboard",
+        "CLJTest/Main.storyboard/Base.lproj/Main.storyboard",
         "wat WatchKit App.app",
     ]
 
@@ -138,13 +138,13 @@ def test_get_paths(one: xcodeproj.XcodeProject, two: xcodeproj.XcodeProject) -> 
 
     groups = [
         "wat WatchKit App",
-        None,
+        "Frameworks",
         "CLJTest",
-        "CLJTest",
-        "wat WatchKit App",
-        "CLJTest",
-        None,
-        None,
+        "CLJTest/LaunchScreen.storyboard",
+        "wat WatchKit App/Interface.storyboard",
+        "CLJTest/Main.storyboard",
+        "",
+        "Products",
         "wat WatchKit Extension",
         "wat WatchKit Extension",
     ]
@@ -156,6 +156,8 @@ def test_get_paths(one: xcodeproj.XcodeProject, two: xcodeproj.XcodeProject) -> 
             continue
         assert group.absolute_path() == os.path.join(COLLATERAL_PATH, value)
 
+    version_groups = ["TestVersionGroup", "TestVersionGroup"]
+
     for index, version_group in enumerate(two.fetch_type(xcodeproj.XCVersionGroup).values()):
         if index == 0:
             with pytest.raises(Exception):
@@ -163,8 +165,10 @@ def test_get_paths(one: xcodeproj.XcodeProject, two: xcodeproj.XcodeProject) -> 
             with pytest.raises(Exception):
                 _ = version_group.absolute_path()
         else:
-            assert version_group.relative_path() is None
-            assert version_group.absolute_path() is None
+            assert version_group.relative_path() == version_groups[index]
+            assert version_group.absolute_path() == os.path.join(
+                COLLATERAL_PATH, version_groups[index]
+            )
 
 
 def test_get_paths_prepopulated(one: xcodeproj.XcodeProject, two: xcodeproj.XcodeProject) -> None:
@@ -191,8 +195,8 @@ def test_get_paths_prepopulated(one: xcodeproj.XcodeProject, two: xcodeproj.Xcod
         "CLJTest/AppDelegate.swift",
         "wat WatchKit Extension.appex",
         "CLJTest.app",
-        "CLJTest/Base.lproj/LaunchScreen.storyboard",
-        "wat WatchKit App/Base.lproj/Interface.storyboard",
+        "CLJTest/LaunchScreen.storyboard/Base.lproj/LaunchScreen.storyboard",
+        "wat WatchKit App/Interface.storyboard/Base.lproj/Interface.storyboard",
         "wat WatchKit Extension/Assets.xcassets",
         "CLJTest/Assets.xcassets",
         "CLJTest/test.m",
@@ -200,7 +204,7 @@ def test_get_paths_prepopulated(one: xcodeproj.XcodeProject, two: xcodeproj.Xcod
         "CLJTest/ViewController.swift",
         "wat WatchKit Extension/ExtensionDelegate.swift",
         "wat.app",
-        "CLJTest/Base.lproj/Main.storyboard",
+        "CLJTest/Main.storyboard/Base.lproj/Main.storyboard",
         "wat WatchKit App.app",
     ]
 
@@ -217,13 +221,13 @@ def test_get_paths_prepopulated(one: xcodeproj.XcodeProject, two: xcodeproj.Xcod
 
     groups = [
         "wat WatchKit App",
-        None,
+        "Frameworks",
         "CLJTest",
-        "CLJTest",
-        "wat WatchKit App",
-        "CLJTest",
-        None,
-        None,
+        "CLJTest/LaunchScreen.storyboard",
+        "wat WatchKit App/Interface.storyboard",
+        "CLJTest/Main.storyboard",
+        "",
+        "Products",
         "wat WatchKit Extension",
         "wat WatchKit Extension",
     ]
@@ -235,6 +239,8 @@ def test_get_paths_prepopulated(one: xcodeproj.XcodeProject, two: xcodeproj.Xcod
             continue
         assert group.absolute_path() == os.path.join(COLLATERAL_PATH, value)
 
+    version_groups = ["TestVersionGroup", "TestVersionGroup"]
+
     for index, version_group in enumerate(two.fetch_type(xcodeproj.XCVersionGroup).values()):
         if index == 0:
             with pytest.raises(Exception):
@@ -242,8 +248,10 @@ def test_get_paths_prepopulated(one: xcodeproj.XcodeProject, two: xcodeproj.Xcod
             with pytest.raises(Exception):
                 _ = version_group.absolute_path()
         else:
-            assert version_group.relative_path() is None
-            assert version_group.absolute_path() is None
+            assert version_group.relative_path() == version_groups[index]
+            assert version_group.absolute_path() == os.path.join(
+                COLLATERAL_PATH, version_groups[index]
+            )
 
     reference_proxy_expectations = [("BUILT_PRODUCTS_DIR", "SomeTest.framework")]
 
