@@ -147,7 +147,7 @@ class PBXPathObject(PBXObject):
             ):
                 current_segment_from_self = None
             else:
-                current_segment_from_self = self.path or self.name
+                current_segment_from_self = self.path
         else:  # PBXFileReference or other similar types
             current_segment_from_self = self.path
 
