@@ -77,15 +77,8 @@ class PBXPathObject(PBXObject):
             return cast(str, self.path)
 
         if self.source_tree == "<absolute>":
-            if self.path:
-                if not self.path.startswith(os.sep):
-                    setattr(self, "_relative_path", self.path)
-                else:
-                    raise Exception("Unexpected state. Please file an issue on GitHub.")
-            else:
-                raise Exception(
-                    "Unexpected state. PBXPathObject with <absolute> source tree has no path. Please file an issue on GitHub."
-                )
+            if self.path and not self.path.startswith(os.sep):
+                setattr(self, "_relative_path", self.path)
             return self.path
 
         if self.source_tree != "<group>":
