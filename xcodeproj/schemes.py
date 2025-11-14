@@ -550,7 +550,7 @@ class ArchiveAction(Action):
 class Scheme:
     """Represents an Xcode scheme."""
 
-    def __init__(self, node: Element[str], name: str) -> None:
+    def __init__(self, node, name: str) -> None:
         assert node.tag == "Scheme"
         self.name = name
         self.last_upgrade_version = node.attrib.pop("LastUpgradeVersion", None)
