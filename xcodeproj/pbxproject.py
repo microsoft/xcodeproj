@@ -1,6 +1,6 @@
 """PBXProject object."""
 
-from typing import Any, cast, Dict, List, Optional
+from typing import Any, cast
 
 import deserialize
 
@@ -23,24 +23,24 @@ class PBXProject(PBXObject):
     This is the root object.
     """
 
-    attributes: Dict[str, Any]
+    attributes: dict[str, Any]
     build_configuration_list_id: str
     compatibility_version: str
     development_region: str
     has_scanned_for_encodings: bool
-    known_regions: List[str]
+    known_regions: list[str]
     main_group_id: str
-    product_ref_group: Optional[str]
+    product_ref_group: str | None
     project_dir_path: str
     project_root: str
-    target_ids: List[str]
-    project_references: Optional[List[ProjectReference]]
-    package_references: Optional[List[str]]
-    minimized_project_reference_proxies: Optional[str]
-    preferred_project_object_version: Optional[str]
+    target_ids: list[str]
+    project_references: list[ProjectReference] | None
+    package_references: list[str] | None
+    minimized_project_reference_proxies: str | None
+    preferred_project_object_version: str | None
 
     @property
-    def targets(self) -> List[PBXTarget]:
+    def targets(self) -> list[PBXTarget]:
         """Get the targets in the project."""
         return [cast(PBXTarget, self.objects()[target_id]) for target_id in self.target_ids]
 

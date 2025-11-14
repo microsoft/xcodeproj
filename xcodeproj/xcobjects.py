@@ -1,6 +1,6 @@
 """PBX object types"""
 
-from typing import Any, cast, Dict, List, Optional
+from typing import Any, cast, Optional
 
 import deserialize
 
@@ -17,8 +17,8 @@ class XCBuildConfiguration(PBXObject):
     "Debug" or "Release".
     """
 
-    base_configuration_reference_id: Optional[str]
-    build_settings: Dict[str, Any]
+    base_configuration_reference_id: str | None
+    build_settings: dict[str, Any]
     name: str
 
     @property
@@ -45,12 +45,12 @@ class XCConfigurationList(PBXObject):
     This is a list of build configurations. Usually associated with a target.
     """
 
-    build_configuration_ids: List[str]
+    build_configuration_ids: list[str]
     default_configuration_is_visible: bool
     default_configuration_name: str
 
     @property
-    def build_configurations(self) -> List[XCBuildConfiguration]:
+    def build_configurations(self) -> list[XCBuildConfiguration]:
         """Get all the build configurations for this list.
 
         :returns: The build configurations
@@ -82,4 +82,4 @@ class XCRemoteSwiftPackageReference(PBXObject):
     """
 
     repository_url: str
-    requirement: Dict[str, Any]
+    requirement: dict[str, Any]

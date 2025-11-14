@@ -1,6 +1,6 @@
 """PBX files"""
 
-from typing import Any, cast, Dict, Optional
+from typing import Any, cast
 
 import deserialize
 
@@ -19,10 +19,10 @@ class PBXBuildFile(PBXObject):
     effectively pointers to a PBXFileReference which is an actual file.
     """
 
-    file_ref_id: Optional[str]
-    product_ref_id: Optional[str]
-    platform_filter: Optional[str]
-    settings: Optional[Dict[str, Any]]
+    file_ref_id: str | None
+    product_ref_id: str | None
+    platform_filter: str | None
+    settings: dict[str, Any] | None
 
     @property
     def file_ref(self) -> PBXFileReference:

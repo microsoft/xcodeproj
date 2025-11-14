@@ -1,6 +1,6 @@
 """PBX build phases"""
 
-from typing import cast, List, Optional
+from typing import cast
 
 import deserialize
 
@@ -16,12 +16,12 @@ from .files import PBXBuildFile
 class PBXBuildPhase(PBXObject):
     """Represents a PBXBuildPhase."""
 
-    file_ids: List[str]
+    file_ids: list[str]
     build_action_mask: str
     run_only_for_deployment_post_processing: bool
 
     @property
-    def files(self) -> List[PBXBuildFile]:
+    def files(self) -> list[PBXBuildFile]:
         """Get the files in the build phase."""
         return [cast(PBXBuildFile, self.objects()[file_id]) for file_id in self.file_ids]
 
@@ -63,16 +63,16 @@ class PBXShellScriptBuildPhase(PBXBuildPhase):
     other phases exist.
     """
 
-    input_paths: Optional[List[str]]
-    output_paths: Optional[List[str]]
-    input_file_list_paths: Optional[List[str]]
-    output_file_list_paths: Optional[List[str]]
+    input_paths: list[str] | None
+    output_paths: list[str] | None
+    input_file_list_paths: list[str] | None
+    output_file_list_paths: list[str] | None
     name: str
     shell_path: str
     shell_script: str
-    show_env_vars_in_log: Optional[bool]
-    always_out_of_date: Optional[bool]
-    dependency_file: Optional[str]
+    show_env_vars_in_log: bool | None
+    always_out_of_date: bool | None
+    dependency_file: str | None
 
 
 @deserialize.key("destination_path", "dstPath")
@@ -86,9 +86,9 @@ class PBXCopyFilesBuildPhase(PBXBuildPhase):
     other phases exist.
     """
 
-    destination_path: Optional[str]
+    destination_path: str | None
     destination_subfolder_spec: int
-    name: Optional[str]
+    name: str | None
 
 
 @deserialize.downcast_identifier(PBXObject, "PBXFrameworksBuildPhase")

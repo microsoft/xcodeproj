@@ -12,19 +12,16 @@ import pathlib
 from typing import (
     Any,
     cast,
-    Dict,
-    List,
-    MutableMapping,
-    Optional,
     Type,
     TypeVar,
 )
 import subprocess
 import weakref
 
-import appdirs
+import platformdirs
 import deserialize
 
+from .objects import Objects
 from .pbxobject import PBXObject
 from .buildphases import (
     PBXBuildPhase,
@@ -62,7 +59,7 @@ PBXObjectType = TypeVar("PBXObjectType", bound=PBXObject)
 # pylint: enable=invalid-name
 
 
-def _load_pbxproj_as_json(path: str) -> Dict[str, Any]:
+def _load_pbxproj_as_json(path: str) -> dict[str, Any]:
     """Load a pbxproj as JSON.
 
     :param path: The path to the pbxproj
@@ -82,11 +79,7 @@ def _load_pbxproj_as_json(path: str) -> Dict[str, Any]:
         stdout=subprocess.PIPE,
         check=True,
     ).stdout
-    return cast(Dict[str, Any], json.loads(content))
-
-
-class Objects(dict, MutableMapping[str, PBXObject]):
-    """Holds the objects in the pbxproj."""
+    return cast(dict[str, Any], json.loads(content))
 
 
 class XcodeProject:
@@ -99,8 +92,8 @@ class XcodeProject:
     source_root: str
     objects: Objects
     project: PBXProject
-    _cached_items: Dict[str, Dict[str, PBXObject]]
-    _schemes: Optional[List[Scheme]]
+    _cached_items: dict[str, dict[str, PBXObject]]
+    _schemes: list[Scheme] | None
     _is_populated: bool
 
     def __init__(self, path: str, *, ignore_deserialization_errors: bool = False) -> None:
@@ -113,14 +106,14 @@ class XcodeProject:
 
         self.objects = Objects(
             **deserialize.deserialize(
-                Dict[str, PBXObject],
+                dict[str, PBXObject],
                 tree["objects"],
                 throw_on_unhandled=not ignore_deserialization_errors,
                 raw_storage_mode=deserialize.RawStorageMode.ALL,
             )
         )
 
-        self.project = self.objects[tree["rootObject"]]
+        self.project = cast(PBXProject, self.objects[tree["rootObject"]])
         self._cached_items = {}
         self._schemes = None
         self._is_populated = False
@@ -137,7 +130,8 @@ class XcodeProject:
 
         :returns: The loaded XcodeProj
         """
-        cache_folder = appdirs.user_cache_dir("xcodeproj")
+
+        cache_folder = platformdirs.user_cache_dir("xcodeproj")
 
         try:
             project_hash = hashlib.md5(
@@ -159,7 +153,7 @@ class XcodeProject:
         """
         self.populate_paths()
 
-        cache_folder = appdirs.user_cache_dir("xcodeproj")
+        cache_folder = platformdirs.user_cache_dir("xcodeproj")
         os.makedirs(cache_folder, exist_ok=True)
 
         project_hash = hashlib.md5(
@@ -169,7 +163,7 @@ class XcodeProject:
         with open(os.path.join(cache_folder, f"{project_hash}.dat"), "wb") as cached_file:
             pickle.dump(self, cached_file)
 
-    def __setstate__(self, state):
+    def __setstate__(self, state: dict[str, Any]) -> None:
         """Restore state from the unpickled state values."""
         self.__dict__ = state
         self._set_weak_refs()
@@ -191,7 +185,7 @@ class XcodeProject:
         if object_type.__name__ in self._cached_items:
             return
 
-        cached_items: Dict[str, PBXObject] = {}
+        cached_items: dict[str, PBXObject] = {}
 
         for object_key, project_object in self.objects.items():
             if not isinstance(project_object, object_type):
@@ -204,7 +198,7 @@ class XcodeProject:
     def _populate(
         self,
         parent_group: PBXPathObject,
-        path: Optional[str],
+        path: str | None,
         non_set: list[PBXPathObject],
     ) -> None:
         if path is not None:
@@ -241,7 +235,7 @@ class XcodeProject:
 
         non_set: list[PBXPathObject] = []
 
-        root_group = self.objects[self.project.main_group_id]
+        root_group = cast(PBXPathObject, self.objects[self.project.main_group_id])
         self._populate(root_group, None, non_set)
 
         for item in non_set:
@@ -249,7 +243,7 @@ class XcodeProject:
 
         self._is_populated = True
 
-    def fetch_type(self, object_type: Type[PBXObjectType]) -> Dict[str, PBXObjectType]:
+    def fetch_type(self, object_type: Type[PBXObjectType]) -> dict[str, PBXObjectType]:
         """Load the items specified from the cache, populating the cache if required.
 
         :param object_type: The type of objects to get
@@ -257,16 +251,16 @@ class XcodeProject:
         :returns: The type from the cache
         """
         self._populate_cache(object_type)
-        return cast(Dict[str, PBXObjectType], self._cached_items[object_type.__name__])
+        return cast(dict[str, PBXObjectType], self._cached_items[object_type.__name__])
 
-    def targets(self) -> List[PBXNativeTarget]:
+    def targets(self) -> list[PBXNativeTarget]:
         """Get the targets.
 
         :returns: A list of targets
         """
         return list(self.fetch_type(PBXNativeTarget).values())
 
-    def target_by_name(self, name: str) -> Optional[PBXNativeTarget]:
+    def target_by_name(self, name: str) -> PBXNativeTarget | None:
         """Get a target by name.
 
         :param str name: The name of the target to find
@@ -278,7 +272,7 @@ class XcodeProject:
                 return target
         return None
 
-    def target_containing_phase(self, source_build_phase_ref: str) -> Optional[PBXNativeTarget]:
+    def target_containing_phase(self, source_build_phase_ref: str) -> PBXNativeTarget | None:
         """Find the target containing the Source Build Phase
         :param source_build_phase_ref: The reference of the parent
 
@@ -292,7 +286,7 @@ class XcodeProject:
 
     def build_configuration_list_for_target(
         self, native_target_name: str
-    ) -> Optional[XCConfigurationList]:
+    ) -> XCConfigurationList | None:
         """Searches for build configuration via a target's name
 
         :param native_target_name: The name of the native target to find
@@ -309,7 +303,7 @@ class XcodeProject:
         return None
 
     @property
-    def schemes(self) -> List[Scheme]:
+    def schemes(self) -> list[Scheme]:
         """Load the schemes for the project.
 
         :returns: A list of schemes
@@ -317,7 +311,7 @@ class XcodeProject:
         if self._schemes is not None:
             return self._schemes
 
-        scheme_paths = []
+        scheme_paths: list[str] = []
 
         for path, _, files in os.walk(self.path):
             for file_path in files:
@@ -325,7 +319,7 @@ class XcodeProject:
                     continue
                 scheme_paths.append(os.path.join(path, file_path))
 
-        all_schemes: List[Scheme] = []
+        all_schemes: list[Scheme] = []
 
         for scheme_path in scheme_paths:
             all_schemes.append(Scheme.from_file(scheme_path))

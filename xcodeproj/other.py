@@ -1,7 +1,5 @@
 """PBX object types"""
 
-from typing import List, Optional
-
 import deserialize
 
 from .pbxobject import PBXObject
@@ -15,9 +13,9 @@ class PBXTargetDependency(PBXObject):
     Tracks dependencies between targets.
     """
 
-    name: Optional[str]
-    platform_filter: Optional[str]
-    target: Optional[str]
+    name: str | None
+    platform_filter: str | None
+    target: str | None
     target_proxy: str
 
 
@@ -55,5 +53,5 @@ class PBXFileSystemSynchronizedBuildFileExceptionSet(PBXObject):
     reduce merge conflicts in the pbxproj.
     """
 
-    membership_exceptions: List[str]
+    membership_exceptions: list[str]
     target: str

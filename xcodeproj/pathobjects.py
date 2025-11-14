@@ -1,7 +1,7 @@
 """PBX path objects"""
 
 import os
-from typing import cast, List, Optional
+from typing import cast, Optional
 
 import deserialize
 
@@ -16,11 +16,11 @@ from .pbxobject import PBXObject
 class PBXPathObject(PBXObject):
     """Represents an object with a path (i.e. file or group)."""
 
-    path: Optional[str]
+    path: str | None
     source_tree: str
 
-    _parent_group_reference: Optional[str]
-    _relative_path: Optional[str]
+    _parent_group_reference: str | None
+    _relative_path: str | None
 
     def parent_group(self) -> Optional["PBXGroup"]:
         """Find the parent group of a reference.
@@ -40,7 +40,7 @@ class PBXPathObject(PBXObject):
                 self.project().objects[getattr(self, "_parent_group_reference")],
             )
 
-        group_types_to_check = [
+        group_types_to_check: list[type] = [
             PBXGroup,
             PBXVariantGroup,
             XCVersionGroup,
@@ -54,7 +54,7 @@ class PBXPathObject(PBXObject):
 
         return None
 
-    def relative_path(self) -> Optional[str]:
+    def relative_path(self) -> str | None:
         """Get the relative path for the group to the source root
 
         This works by getting the current references path, then searching up the
@@ -151,13 +151,14 @@ class PBXPathObject(PBXObject):
                 # Avoid os.path.join("", "/abs/path") becoming "//abs/path"
                 calculated_path = current_segment_from_self
             else:
+                assert base_path_for_self is not None
                 calculated_path = os.path.join(base_path_for_self, current_segment_from_self)
 
         setattr(self, "_relative_path", calculated_path)
         return calculated_path
         # pylint: enable=too-many-return-statements
 
-    def absolute_path(self) -> Optional[str]:
+    def absolute_path(self) -> str | None:
         """Find the absolute path
 
         :returns: The absolute path of the object
@@ -195,14 +196,14 @@ class PBXGroup(PBXPathObject):
     This is a group in the Xcode file explorer.
     """
 
-    children_ids: List[str]
-    indent_width: Optional[int]
-    tab_width: Optional[int]
-    uses_tabs: Optional[bool]
-    name: Optional[str]
+    children_ids: list[str]
+    indent_width: int | None
+    tab_width: int | None
+    uses_tabs: bool | None
+    name: str | None
 
     @property
-    def children(self) -> List[PBXPathObject]:
+    def children(self) -> list[PBXPathObject]:
         """Get all the children for this group.
 
         :returns: The children for this group
@@ -219,7 +220,7 @@ class PBXVariantGroup(PBXGroup):
     .strings file, where the "file" can be expanded to see each language.
     """
 
-    name: str
+    name: str  # type: ignore
 
 
 @deserialize.key("file_encoding", "fileEncoding")
@@ -240,16 +241,16 @@ class PBXFileReference(PBXPathObject):
     The details of a particular file.
     """
 
-    file_encoding: Optional[int]
-    last_known_file_type: Optional[str]
-    line_ending: Optional[str]
-    indent_width: Optional[str]
-    tab_width: Optional[str]
-    wraps_lines: Optional[bool]
-    name: Optional[str]
-    xc_language_specification_identifier: Optional[str]
-    explicit_file_type: Optional[str]
-    include_in_index: Optional[str]
+    file_encoding: int | None
+    last_known_file_type: str | None
+    line_ending: str | None
+    indent_width: str | None
+    tab_width: str | None
+    wraps_lines: bool | None
+    name: str | None
+    xc_language_specification_identifier: str | None
+    explicit_file_type: str | None
+    include_in_index: str | None
 
 
 @deserialize.auto_snake()
@@ -261,13 +262,13 @@ class XCVersionGroup(PBXPathObject):
     These groups have versioned files in them
     """
 
-    child_ids: List[str]
+    child_ids: list[str]
     current_version: str
     version_group_type: str
-    name: Optional[str]
+    name: str | None
 
     @property
-    def children(self) -> List[PBXPathObject]:
+    def children(self) -> list[PBXPathObject]:
         """Get all the children for this group.
 
         :returns: The children for this group
@@ -285,7 +286,7 @@ class PBXReferenceProxy(PBXPathObject):
     """
 
     file_type: str
-    path: str
+    path: str  # type: ignore
     remote_ref: str
     source_tree: str
 
@@ -302,6 +303,6 @@ class PBXFileSystemSynchronizedRootGroup(PBXPathObject):
     reduce merge conflicts in the pbxproj.
     """
 
-    exception_ids: List[str]
+    exception_ids: list[str]
     explicit_file_types: dict[str, str]
-    explicit_folders: List[str]
+    explicit_folders: list[str]

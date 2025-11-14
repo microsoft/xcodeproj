@@ -1,8 +1,11 @@
 """PBX object types"""
 
-from typing import Any, Callable, cast, Dict
+from typing import Any, cast
+import weakref
 
 import deserialize
+
+from .objects import Objects
 
 
 @deserialize.allow_unhandled("isa")
@@ -17,25 +20,25 @@ class PBXObject:
     """
 
     object_key: str
-    objects_ref: Callable[[], Dict[str, "PBXObject"]]
-    project_ref: Callable[[], Any]
+    objects_ref: weakref.ReferenceType[Objects]
+    project_ref: weakref.ReferenceType[Any]
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         """Return state values to be pickled."""
-        new_dict = {}
+        new_dict: dict[str, Any] = {}
         for key, value in self.__dict__.items():
             if key in ["objects_ref", "project_ref"]:
                 continue
             new_dict[key] = value
         return new_dict
 
-    def objects(self) -> Dict[str, "PBXObject"]:
+    def objects(self) -> Objects:
         """Resolve objects reference.
 
         :returns: Resolved objects dictionary
         """
         reference = getattr(self, "objects_ref")
-        return cast(Dict[str, "PBXObject"], reference())
+        return cast(Objects, reference())
 
     def project(self) -> Any:
         """Resolve objects reference.

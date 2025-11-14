@@ -1,7 +1,5 @@
 """PBX build phases"""
 
-from typing import List
-
 import deserialize
 
 from .pbxobject import PBXObject
@@ -15,7 +13,7 @@ class PBXBuildRule(PBXObject):
 
     compiler_spec: str
     file_type: str
-    input_files: List[str]
-    output_files: List[str]
+    input_files: list[str]
+    output_files: list[str]
     is_editable: bool
     script: str

@@ -26,7 +26,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
-appdirs = "^1.4.4"
+platformdirs = "^4.5.0"
 deserialize = "^2.0.1"
 
 [tool.poetry.dev-dependencies]
