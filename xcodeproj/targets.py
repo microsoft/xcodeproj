@@ -30,6 +30,7 @@ class PBXProductType(enum.Enum):
     WATCH_APP2             = "com.apple.product-type.application.watchapp2"
     WATCH_APP2_CONTAINER   = "com.apple.product-type.application.watchapp2-container"
     WATCHKIT2_EXTENSION    = "com.apple.product-type.watchkit2-extension"
+    EXTENSIONKIT_EXTENSION = "com.apple.product-type.extensionkit-extension"
     # fmt: on
 
 
@@ -84,6 +85,7 @@ class PBXNativeTarget(PBXTarget):
     product_reference_id: str | None
     product_type: PBXProductType
     package_product_dependencies: list[str] | None
+    file_system_synchronized_groups: list[str] | None
 
     @property
     def product_reference(self) -> PBXFileReference | None:
