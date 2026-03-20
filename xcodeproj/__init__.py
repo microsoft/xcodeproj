@@ -53,7 +53,6 @@ from .schemes import Scheme
 from .targets import PBXAggregateTarget, PBXNativeTarget, PBXProductType, PBXTarget
 from .xcobjects import XCBuildConfiguration, XCConfigurationList
 
-
 # pylint: disable=invalid-name
 PBXObjectType = TypeVar("PBXObjectType", bound=PBXObject)
 # pylint: enable=invalid-name

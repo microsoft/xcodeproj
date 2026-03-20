@@ -67,7 +67,7 @@ class PBXPathObject(PBXObject):
         :returns: The path if found, None otherwise
         """
 
-        # pylint: disable=too-many-return-statements
+        # pylint: disable=too-many-return-statements,too-many-branches
 
         if hasattr(self, "_relative_path") and self._relative_path is not None:
             return self._relative_path
@@ -123,7 +123,7 @@ class PBXPathObject(PBXObject):
                         # Virtual parent is main group or orphan. Either way, its container is effectively root.
                         base_path_for_self = ""
                     else:
-                        base_path_for_self = grandparent.relative_path()
+                        base_path_for_self = grandparent.relative_path() or ""
                 else:
                     # Parent is virtual, but child's path does not start with parent's name
                     # (e.g., parent "Commands", child path "MyFile.swift").
@@ -156,7 +156,7 @@ class PBXPathObject(PBXObject):
 
         setattr(self, "_relative_path", calculated_path)
         return calculated_path
-        # pylint: enable=too-many-return-statements
+        # pylint: enable=too-many-return-statements,too-many-branches
 
     def absolute_path(self) -> str | None:
         """Find the absolute path
