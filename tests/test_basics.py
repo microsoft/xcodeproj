@@ -10,7 +10,6 @@ import pytest
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.abspath(__file__), "..", "..")))
 import xcodeproj
 
-
 # Fixtures work by redefining names, so we need to disable this
 # pylint: disable=redefined-outer-name
 
@@ -112,8 +111,8 @@ def test_get_paths(one: xcodeproj.XcodeProject, two: xcodeproj.XcodeProject) -> 
         "CLJTest/AppDelegate.swift",
         "wat WatchKit Extension.appex",
         "CLJTest.app",
-        "CLJTest/LaunchScreen.storyboard/Base.lproj/LaunchScreen.storyboard",
-        "wat WatchKit App/Interface.storyboard/Base.lproj/Interface.storyboard",
+        "CLJTest/Base.lproj/LaunchScreen.storyboard",
+        "wat WatchKit App/Base.lproj/Interface.storyboard",
         "wat WatchKit Extension/Assets.xcassets",
         "CLJTest/Assets.xcassets",
         "CLJTest/test.m",
@@ -121,7 +120,7 @@ def test_get_paths(one: xcodeproj.XcodeProject, two: xcodeproj.XcodeProject) -> 
         "CLJTest/ViewController.swift",
         "wat WatchKit Extension/ExtensionDelegate.swift",
         "wat.app",
-        "CLJTest/Main.storyboard/Base.lproj/Main.storyboard",
+        "CLJTest/Base.lproj/Main.storyboard",
         "wat WatchKit App.app",
     ]
 
@@ -136,16 +135,18 @@ def test_get_paths(one: xcodeproj.XcodeProject, two: xcodeproj.XcodeProject) -> 
         else:
             assert absolute_path == os.path.join(COLLATERAL_PATH, expected[index])
 
+    # Groups with no `path` attribute (only a `name`) are "virtual" and
+    # transparent in the path chain — they contribute nothing, matching the
+    # behaviour of the Ruby xcodeproj library.
     groups = [
         "wat WatchKit App",
-        "Frameworks",
-        "CLJTest",
-        "CLJTest/LaunchScreen.storyboard",
-        "wat WatchKit App/Interface.storyboard",
-        "CLJTest/Main.storyboard",
         "",
-        "Products",
-        "wat WatchKit Extension",
+        "CLJTest",
+        "CLJTest",
+        "wat WatchKit App",
+        "CLJTest",
+        "",
+        "",
         "wat WatchKit Extension",
     ]
 
@@ -195,8 +196,8 @@ def test_get_paths_prepopulated(one: xcodeproj.XcodeProject, two: xcodeproj.Xcod
         "CLJTest/AppDelegate.swift",
         "wat WatchKit Extension.appex",
         "CLJTest.app",
-        "CLJTest/LaunchScreen.storyboard/Base.lproj/LaunchScreen.storyboard",
-        "wat WatchKit App/Interface.storyboard/Base.lproj/Interface.storyboard",
+        "CLJTest/Base.lproj/LaunchScreen.storyboard",
+        "wat WatchKit App/Base.lproj/Interface.storyboard",
         "wat WatchKit Extension/Assets.xcassets",
         "CLJTest/Assets.xcassets",
         "CLJTest/test.m",
@@ -204,7 +205,7 @@ def test_get_paths_prepopulated(one: xcodeproj.XcodeProject, two: xcodeproj.Xcod
         "CLJTest/ViewController.swift",
         "wat WatchKit Extension/ExtensionDelegate.swift",
         "wat.app",
-        "CLJTest/Main.storyboard/Base.lproj/Main.storyboard",
+        "CLJTest/Base.lproj/Main.storyboard",
         "wat WatchKit App.app",
     ]
 
@@ -221,14 +222,13 @@ def test_get_paths_prepopulated(one: xcodeproj.XcodeProject, two: xcodeproj.Xcod
 
     groups = [
         "wat WatchKit App",
-        "Frameworks",
-        "CLJTest",
-        "CLJTest/LaunchScreen.storyboard",
-        "wat WatchKit App/Interface.storyboard",
-        "CLJTest/Main.storyboard",
         "",
-        "Products",
-        "wat WatchKit Extension",
+        "CLJTest",
+        "CLJTest",
+        "wat WatchKit App",
+        "CLJTest",
+        "",
+        "",
         "wat WatchKit Extension",
     ]
 
