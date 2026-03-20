@@ -6,13 +6,15 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  pull-requests: write
+
 jobs:
   test:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10", "3.11"]
-      max-parallel: 4
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +25,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install Poetry
-        run: curl -sSL https://install.python-poetry.org | python3 -
+        run: pipx install poetry
 
       - name: Install dependencies
         run: poetry install
@@ -34,16 +36,29 @@ jobs:
           poetry run pylint --rcfile=pylintrc tests
 
       - name: Type Check
-        run: |
-          poetry run mypy --ignore-missing-imports xcodeproj/
-          poetry run mypy --ignore-missing-imports tests/
+        run: poetry run mypy xcodeproj/ tests/
 
       - name: Test
-        run: |
-          poetry run pytest tests --cov=xcodeproj --cov-report html --cov-report xml --doctest-modules --junitxml=junit/test-results.xml
+        run: poetry run pytest tests --cov=xcodeproj --cov-report xml --doctest-modules --junitxml=junit/test-results.xml
 
-      - name: Inline CSS
-        run: poetry run python inlinecss.py htmlcov
+      - name: Coverage summary
+        if: always()
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: coverage.xml
+          format: markdown
+          output: both
+
+      - name: Add coverage to job summary
+        if: always()
+        run: cat code-coverage-results.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Add coverage PR comment
+        if: always() && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          path: code-coverage-results.md
+          header: coverage-${{ matrix.python-version }}
 
       - name: Upload test results
         if: always()
@@ -51,12 +66,3 @@ jobs:
         with:
           name: test-results-${{ matrix.python-version }}
           path: junit/test-results.xml
-
-      - name: Upload coverage report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-${{ matrix.python-version }}
-          path: |
-            coverage.xml
-            htmlcov/

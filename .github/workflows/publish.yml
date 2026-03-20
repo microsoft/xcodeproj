@@ -20,10 +20,7 @@ jobs:
           python-version: "3.x"
 
       - name: Install Poetry
-        run: curl -sSL https://install.python-poetry.org | python3 -
-
-      - name: Install dependencies
-        run: poetry install
+        run: pipx install poetry
 
       - name: Build
         run: poetry build
