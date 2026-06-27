@@ -38,6 +38,16 @@ def two() -> xcodeproj.XcodeProject:
     return xcodeproj.XcodeProject(two_path)
 
 
+@pytest.fixture(scope="session")
+def synchronized() -> xcodeproj.XcodeProject:
+    """Load an Xcode 16 buildable-folder project.
+
+    :returns: The project
+    """
+    path = os.path.join(COLLATERAL_PATH, "Synchronized", "Synchronized.xcodeproj")
+    return xcodeproj.XcodeProject(path)
+
+
 def test_base_references(one: xcodeproj.XcodeProject) -> None:
     """Test that references work
 
@@ -390,3 +400,43 @@ def test_find_target_by_id(one: xcodeproj.XcodeProject) -> None:
     target = one.project.find_target("DD74C32525AF302A00C4A922")
     assert target is not None
     assert isinstance(target, xcodeproj.PBXTarget)
+
+
+def test_synchronized_root_group_optional_fields(synchronized: xcodeproj.XcodeProject) -> None:
+    """Xcode omits empty exceptions/explicitFileTypes/explicitFolders on a
+    synchronized root group, so they should default to empty containers.
+
+    :param synchronized: The Xcode 16 buildable-folder project
+    """
+    groups = list(synchronized.fetch_type(xcodeproj.PBXFileSystemSynchronizedRootGroup).values())
+    assert len(groups) == 1
+
+    group = groups[0]
+    assert group.path == "Sources"
+    assert group.exception_ids == []
+    assert group.explicit_file_types == {}
+    assert group.explicit_folders == []
+
+
+def test_synchronized_project_omits_compatibility_version(
+    synchronized: xcodeproj.XcodeProject,
+) -> None:
+    """The Xcode 16 (objectVersion 77) format omits compatibilityVersion.
+
+    :param synchronized: The Xcode 16 buildable-folder project
+    """
+    assert synchronized.project.compatibility_version is None
+
+
+def test_target_file_system_synchronized_groups(
+    synchronized: xcodeproj.XcodeProject,
+) -> None:
+    """A target references its synchronized root groups via fileSystemSynchronizedGroups.
+
+    :param synchronized: The Xcode 16 buildable-folder project
+    """
+    group = list(synchronized.fetch_type(xcodeproj.PBXFileSystemSynchronizedRootGroup).values())[0]
+
+    targets = synchronized.project.targets
+    assert len(targets) == 1
+    assert targets[0].file_system_synchronized_group_ids == [group.object_key]

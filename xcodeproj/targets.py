@@ -37,6 +37,7 @@ class PBXProductType(enum.Enum):
 @deserialize.key("build_phases_ids", "buildPhases")
 @deserialize.key("build_configuration_list_id", "buildConfigurationList")
 @deserialize.key("dependency_ids", "dependencies")
+@deserialize.key("file_system_synchronized_group_ids", "fileSystemSynchronizedGroups")
 @deserialize.auto_snake()
 class PBXTarget(PBXObject):
     """Represents a PBXTarget."""
@@ -44,6 +45,7 @@ class PBXTarget(PBXObject):
     build_configuration_list_id: str
     build_phases_ids: list[str]
     dependency_ids: list[str]
+    file_system_synchronized_group_ids: list[str] | None
     name: str
     product_name: str | None
 
