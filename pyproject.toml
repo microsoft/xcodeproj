@@ -6,12 +6,11 @@ license = "MIT"
 authors = [{ name = "Dale Myers", email = "dalemy@microsoft.com" }]
 readme = "README.md"
 keywords = ["xcode", "xcodeproj", "pbxproj", "apple"]
-requires-python = ">=3.10,<4.0"
+requires-python = ">=3.11,<4.0"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -41,7 +40,7 @@ dev = [
 
 [tool.ruff]
 line-length = 120
-target-version = "py310"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM", "PL"]
@@ -57,7 +56,7 @@ ignore = [
 "tests/*" = ["B017"] # pytest.raises(Exception) is acceptable in tests
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 
 [[tool.mypy.overrides]]
 module = ["deserialize"]
