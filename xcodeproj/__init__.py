@@ -1,14 +1,10 @@
 """Xcode project file management."""
 
-try:
-    import _pickle as pickle  # type: ignore
-except ImportError:
-    import pickle  # type: ignore
-
 import hashlib
 import json
 import os
 import pathlib
+import pickle
 import subprocess
 import weakref
 from importlib.metadata import PackageNotFoundError
