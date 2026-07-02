@@ -295,6 +295,9 @@ class PBXReferenceProxy(PBXPathObject):
 @deserialize.key("explicit_file_types", "explicitFileTypes")
 @deserialize.key("explicit_folders", "explicitFolders")
 @deserialize.key("exception_ids", "exceptions")
+@deserialize.default("exception_ids", [])
+@deserialize.default("explicit_file_types", {})
+@deserialize.default("explicit_folders", [])
 @deserialize.downcast_identifier(PBXObject, "PBXFileSystemSynchronizedRootGroup")
 class PBXFileSystemSynchronizedRootGroup(PBXPathObject):
     """Represents a PBXFileSystemSynchronizedRootGroup.

@@ -25,7 +25,7 @@ class PBXProject(PBXObject):
 
     attributes: dict[str, Any]
     build_configuration_list_id: str
-    compatibility_version: str
+    compatibility_version: str | None
     development_region: str
     has_scanned_for_encodings: bool
     known_regions: list[str]

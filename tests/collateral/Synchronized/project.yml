@@ -1,0 +1,15 @@
+# Minimal Xcode 16 buildable-folder project used as a deserialization fixture.
+# Generated with: xcodegen generate (XcodeGen 2.45+, projectFormat xcode16_0).
+# The empty `explicitFileTypes`/`explicitFolders` that XcodeGen emits on the
+# synchronized group are trimmed afterwards to mirror the Xcode-native shape
+# (Xcode omits them when empty), exercising the optional-field defaults.
+name: Synchronized
+options:
+  projectFormat: xcode16_0
+targets:
+  Synchronized:
+    type: framework
+    platform: iOS
+    sources:
+      - path: Sources
+        type: syncedFolder
