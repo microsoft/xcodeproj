@@ -1,6 +1,6 @@
 [project]
 name = "xcodeproj"
-version = "2.2.5"
+dynamic = ["version"]
 description = "A utility for interacting with Xcode's xcodeproj bundle format."
 license = "MIT"
 authors = [{ name = "Dale Myers", email = "dalemy@microsoft.com" }]
@@ -64,5 +64,8 @@ module = ["deserialize"]
 ignore_missing_imports = true
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
