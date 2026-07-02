@@ -41,24 +41,12 @@ jobs:
       - name: Test
         run: poetry run pytest tests --cov=xcodeproj --cov-report xml --doctest-modules --junitxml=junit/test-results.xml
 
-      - name: Coverage summary
+      - name: Upload coverage report
         if: always()
-        uses: irongut/CodeCoverageSummary@v1.3.0
+        uses: actions/upload-artifact@v4
         with:
-          filename: coverage.xml
-          format: markdown
-          output: both
-
-      - name: Add coverage to job summary
-        if: always()
-        run: cat code-coverage-results.md >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Add coverage PR comment
-        if: always() && github.event_name == 'pull_request'
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          path: code-coverage-results.md
-          header: coverage-${{ matrix.python-version }}
+          name: coverage-${{ matrix.python-version }}
+          path: coverage.xml
 
       - name: Upload test results
         if: always()
@@ -66,3 +54,34 @@ jobs:
         with:
           name: test-results-${{ matrix.python-version }}
           path: junit/test-results.xml
+
+  coverage:
+    needs: test
+    if: always()
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+
+    steps:
+      - name: Download coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-${{ matrix.python-version }}
+
+      - name: Coverage summary
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: coverage.xml
+          format: markdown
+          output: both
+
+      - name: Add coverage to job summary
+        run: cat code-coverage-results.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Add coverage PR comment
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          path: code-coverage-results.md
+          header: coverage-${{ matrix.python-version }}
