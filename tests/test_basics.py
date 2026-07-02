@@ -2,20 +2,15 @@
 
 import os
 import pickle
-import sys
 import tempfile
 
 import pytest
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.abspath(__file__), "..", "..")))
 import xcodeproj
 
 # Fixtures work by redefining names, so we need to disable this
-# pylint: disable=redefined-outer-name
 
-COLLATERAL_PATH = os.path.join(
-    os.path.abspath(os.path.join(os.path.abspath(__file__), "..")), "collateral"
-)
+COLLATERAL_PATH = os.path.join(os.path.abspath(os.path.join(os.path.abspath(__file__), "..")), "collateral")
 
 
 @pytest.fixture(scope="session")
@@ -177,9 +172,7 @@ def test_get_paths(one: xcodeproj.XcodeProject, two: xcodeproj.XcodeProject) -> 
                 _ = version_group.absolute_path()
         else:
             assert version_group.relative_path() == version_groups[index]
-            assert version_group.absolute_path() == os.path.join(
-                COLLATERAL_PATH, version_groups[index]
-            )
+            assert version_group.absolute_path() == os.path.join(COLLATERAL_PATH, version_groups[index])
 
 
 def test_get_paths_prepopulated(one: xcodeproj.XcodeProject, two: xcodeproj.XcodeProject) -> None:
@@ -259,9 +252,7 @@ def test_get_paths_prepopulated(one: xcodeproj.XcodeProject, two: xcodeproj.Xcod
                 _ = version_group.absolute_path()
         else:
             assert version_group.relative_path() == version_groups[index]
-            assert version_group.absolute_path() == os.path.join(
-                COLLATERAL_PATH, version_groups[index]
-            )
+            assert version_group.absolute_path() == os.path.join(COLLATERAL_PATH, version_groups[index])
 
     reference_proxy_expectations = [("BUILT_PRODUCTS_DIR", "SomeTest.framework")]
 
@@ -278,6 +269,7 @@ def test_get_parents(two: xcodeproj.XcodeProject) -> None:
     """
 
     scene_delegate = two.objects["DD74C32B25AF302A00C4A922"]
+    assert isinstance(scene_delegate, xcodeproj.PBXPathObject)
     scene_delegate_parent = scene_delegate.parent_group()
     assert scene_delegate_parent is not None
     assert scene_delegate_parent.object_key == "DD74C32825AF302A00C4A922"
@@ -291,9 +283,7 @@ def test_build_configuration(one: xcodeproj.XcodeProject) -> None:
 
     list1 = one.build_configuration_list_for_target("CLJTest")
     assert list1 is not None
-    assert sorted(list1.build_configuration_ids) == sorted(
-        ["DD74C33B25AF302C00C4A922", "DD74C33C25AF302C00C4A922"]
-    )
+    assert sorted(list1.build_configuration_ids) == sorted(["DD74C33B25AF302C00C4A922", "DD74C33C25AF302C00C4A922"])
 
     list2 = one.build_configuration_list_for_target("hodor")
     assert list2 is None

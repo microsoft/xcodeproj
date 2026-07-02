@@ -4,8 +4,8 @@ from typing import cast
 
 import deserialize
 
-from .pbxobject import PBXObject
 from .files import PBXBuildFile
+from .pbxobject import PBXObject
 
 
 @deserialize.key("build_action_mask", "buildActionMask")

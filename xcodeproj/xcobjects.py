@@ -1,6 +1,6 @@
 """PBX object types"""
 
-from typing import Any, cast, Optional
+from typing import Any, Optional, cast
 
 import deserialize
 

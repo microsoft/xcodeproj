@@ -32,8 +32,8 @@ jobs:
 
       - name: Lint
         run: |
-          poetry run pylint --rcfile=pylintrc xcodeproj
-          poetry run pylint --rcfile=pylintrc tests
+          poetry run ruff check xcodeproj tests
+          poetry run ruff format --check xcodeproj tests
 
       - name: Type Check
         run: poetry run mypy xcodeproj/ tests/

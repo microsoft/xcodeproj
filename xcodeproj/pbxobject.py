@@ -1,7 +1,7 @@
 """PBX object types"""
 
-from typing import Any, cast
 import weakref
+from typing import Any, cast
 
 import deserialize
 
@@ -37,7 +37,7 @@ class PBXObject:
 
         :returns: Resolved objects dictionary
         """
-        reference = getattr(self, "objects_ref")
+        reference = self.objects_ref
         return cast(Objects, reference())
 
     def project(self) -> Any:
@@ -45,7 +45,7 @@ class PBXObject:
 
         :returns: Resolved objects dictionary
         """
-        reference = getattr(self, "project_ref")
+        reference = self.project_ref
         return reference()
 
     def __eq__(self, other: object) -> bool:

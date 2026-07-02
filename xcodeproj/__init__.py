@@ -9,20 +9,17 @@ import hashlib
 import json
 import os
 import pathlib
-from typing import (
-    Any,
-    cast,
-    Type,
-    TypeVar,
-)
 import subprocess
 import weakref
+from typing import (
+    Any,
+    TypeVar,
+    cast,
+)
 
-import platformdirs
 import deserialize
+import platformdirs
 
-from .objects import Objects
-from .pbxobject import PBXObject
 from .buildphases import (
     PBXBuildPhase,
     PBXCopyFilesBuildPhase,
@@ -34,28 +31,62 @@ from .buildphases import (
 )
 from .buildrules import PBXBuildRule
 from .files import PBXBuildFile
-from .pathobjects import (
-    PBXPathObject,
-    PBXGroup,
-    PBXVariantGroup,
-    PBXFileReference,
-    XCVersionGroup,
-    PBXReferenceProxy,
-    PBXFileSystemSynchronizedRootGroup,
-)
-from .pbxproject import PBXProject
+from .objects import Objects
 from .other import (
-    PBXTargetDependency,
     PBXContainerItemProxy,
     PBXFileSystemSynchronizedBuildFileExceptionSet,
+    PBXTargetDependency,
 )
+from .pathobjects import (
+    PBXFileReference,
+    PBXFileSystemSynchronizedRootGroup,
+    PBXGroup,
+    PBXPathObject,
+    PBXReferenceProxy,
+    PBXVariantGroup,
+    XCVersionGroup,
+)
+from .pbxobject import PBXObject
+from .pbxproject import PBXProject
 from .schemes import Scheme
 from .targets import PBXAggregateTarget, PBXNativeTarget, PBXProductType, PBXTarget
 from .xcobjects import XCBuildConfiguration, XCConfigurationList
 
-# pylint: disable=invalid-name
+__all__ = [
+    "Objects",
+    "PBXAggregateTarget",
+    "PBXBuildFile",
+    "PBXBuildPhase",
+    "PBXBuildRule",
+    "PBXContainerItemProxy",
+    "PBXCopyFilesBuildPhase",
+    "PBXFileReference",
+    "PBXFileSystemSynchronizedBuildFileExceptionSet",
+    "PBXFileSystemSynchronizedRootGroup",
+    "PBXFrameworksBuildPhase",
+    "PBXGroup",
+    "PBXHeadersBuildPhase",
+    "PBXNativeTarget",
+    "PBXObject",
+    "PBXObjectType",
+    "PBXPathObject",
+    "PBXProductType",
+    "PBXProject",
+    "PBXReferenceProxy",
+    "PBXResourcesBuildPhase",
+    "PBXShellScriptBuildPhase",
+    "PBXSourcesBuildPhase",
+    "PBXTarget",
+    "PBXTargetDependency",
+    "PBXVariantGroup",
+    "Scheme",
+    "XCBuildConfiguration",
+    "XCConfigurationList",
+    "XCVersionGroup",
+    "XcodeProject",
+]
+
 PBXObjectType = TypeVar("PBXObjectType", bound=PBXObject)
-# pylint: enable=invalid-name
 
 
 def _load_pbxproj_as_json(path: str) -> dict[str, Any]:
@@ -120,9 +151,7 @@ class XcodeProject:
         self._set_weak_refs()
 
     @staticmethod
-    def from_cache(
-        project_path: str, *, ignore_deserialization_errors: bool = False
-    ) -> "XcodeProject":
+    def from_cache(project_path: str, *, ignore_deserialization_errors: bool = False) -> "XcodeProject":
         """Attempt to load the project from a cached folder if possible.
 
         :param project_path: The path to the actual project (in case it's a cache miss)
@@ -155,9 +184,7 @@ class XcodeProject:
         cache_folder = platformdirs.user_cache_dir("xcodeproj")
         os.makedirs(cache_folder, exist_ok=True)
 
-        project_hash = hashlib.md5(
-            pathlib.Path(os.path.join(self.path, "project.pbxproj")).read_bytes()
-        ).hexdigest()
+        project_hash = hashlib.md5(pathlib.Path(os.path.join(self.path, "project.pbxproj")).read_bytes()).hexdigest()
 
         with open(os.path.join(cache_folder, f"{project_hash}.dat"), "wb") as cached_file:
             pickle.dump(self, cached_file)
@@ -173,7 +200,7 @@ class XcodeProject:
             obj.objects_ref = weakref.ref(self.objects)
             obj.project_ref = weakref.ref(self)
 
-    def _populate_cache(self, object_type: Type[PBXObject]) -> None:
+    def _populate_cache(self, object_type: type[PBXObject]) -> None:
         """Populate the cache of items specified.
 
         This just avoids a full dictionary scan
@@ -201,7 +228,7 @@ class XcodeProject:
         non_set: list[PBXPathObject],
     ) -> None:
         if path is not None:
-            setattr(parent_group, "_relative_path", path)
+            parent_group._relative_path = path
 
         if not isinstance(parent_group, PBXGroup):
             return
@@ -215,11 +242,10 @@ class XcodeProject:
                         self._populate(subgroup, path, non_set)
                     else:
                         non_set.append(subgroup)
+                elif path is not None:
+                    self._populate(subgroup, os.path.join(path, subgroup.path), non_set)
                 else:
-                    if path is not None:
-                        self._populate(subgroup, os.path.join(path, subgroup.path), non_set)
-                    else:
-                        self._populate(subgroup, subgroup.path, non_set)
+                    self._populate(subgroup, subgroup.path, non_set)
             else:
                 non_set.append(subgroup)
 
@@ -242,7 +268,7 @@ class XcodeProject:
 
         self._is_populated = True
 
-    def fetch_type(self, object_type: Type[PBXObjectType]) -> dict[str, PBXObjectType]:
+    def fetch_type(self, object_type: type[PBXObjectType]) -> dict[str, PBXObjectType]:
         """Load the items specified from the cache, populating the cache if required.
 
         :param object_type: The type of objects to get
@@ -283,9 +309,7 @@ class XcodeProject:
                     return native_target
         return None
 
-    def build_configuration_list_for_target(
-        self, native_target_name: str
-    ) -> XCConfigurationList | None:
+    def build_configuration_list_for_target(self, native_target_name: str) -> XCConfigurationList | None:
         """Searches for build configuration via a target's name
 
         :param native_target_name: The name of the native target to find

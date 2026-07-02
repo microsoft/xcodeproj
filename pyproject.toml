@@ -1,47 +1,65 @@
-[tool.poetry]
+[project]
 name = "xcodeproj"
 version = "2.2.5"
 description = "A utility for interacting with Xcode's xcodeproj bundle format."
-
 license = "MIT"
-
-authors = ["Dale Myers <dalemy@microsoft.com>"]
-
-readme = 'README.md'
-
-repository = "https://github.com/Microsoft/xcodeproj"
-homepage = "https://github.com/Microsoft/xcodeproj"
-
-keywords = ['xcode', 'xcodeproj', 'pbxproj', 'apple']
-
+authors = [{ name = "Dale Myers", email = "dalemy@microsoft.com" }]
+readme = "README.md"
+keywords = ["xcode", "xcodeproj", "pbxproj", "apple"]
+requires-python = ">=3.10,<4.0"
 classifiers = [
-    'Development Status :: 4 - Beta',
-    'Intended Audience :: Developers',
-    'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.10',
-    'Programming Language :: Python :: 3.11',
-    'Topic :: Software Development',
-    'Topic :: Utilities',
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "platformdirs>=4.5.0",
+    "deserialize>=2.0.1",
 ]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-platformdirs = "^4.5.0"
-deserialize = "^2.0.1"
+[project.urls]
+homepage = "https://github.com/Microsoft/xcodeproj"
+repository = "https://github.com/Microsoft/xcodeproj"
 
-[tool.poetry.dev-dependencies]
-black = "^26.3.1"
+[tool.poetry.group.dev.dependencies]
 mypy = "^1.19.1"
-pylint = "^4.0.5"
 pytest = "^9.0.2"
 pytest-cov = "^7.0.0"
 requests = "^2.33.0"
+ruff = "^0.15.20"
 types-requests = "^2.32.4"
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM", "PL"]
+ignore = [
+    "PLR0911", # too-many-return-statements
+    "PLR0912", # too-many-branches
+    "PLR0913", # too-many-arguments
+    "PLR0915", # too-many-statements
+    "PLR2004", # magic-value-comparison
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B017"] # pytest.raises(Exception) is acceptable in tests
+
+[tool.mypy]
+python_version = "3.10"
 
 [[tool.mypy.overrides]]
 module = ["deserialize"]
 ignore_missing_imports = true
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=2.0.0"]
 build-backend = "poetry.core.masonry.api"

@@ -3,22 +3,15 @@
 import base64
 import datetime
 import os
-import sys
 import time
 
 import requests
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.abspath(__file__), "..", "..")))
 import xcodeproj
 
-# pylint: disable=too-many-locals
-
 # Fixtures work by redefining names, so we need to disable this
-# pylint: disable=redefined-outer-name
 
-COLLATERAL_PATH = os.path.join(
-    os.path.abspath(os.path.join(os.path.abspath(__file__), "..")), "collateral"
-)
+COLLATERAL_PATH = os.path.join(os.path.abspath(os.path.join(os.path.abspath(__file__), "..")), "collateral")
 SCHEMES_PATH = os.path.join(COLLATERAL_PATH, "schemes")
 
 

@@ -5,11 +5,11 @@ from typing import cast
 
 import deserialize
 
-from .pbxobject import PBXObject
 from .buildphases import PBXBuildPhase
 from .buildrules import PBXBuildRule
-from .pathobjects import PBXFileReference
 from .other import PBXTargetDependency
+from .pathobjects import PBXFileReference
+from .pbxobject import PBXObject
 from .xcobjects import XCConfigurationList
 
 
@@ -62,10 +62,7 @@ class PBXTarget(PBXObject):
     @property
     def dependencies(self) -> list["PBXTargetDependency"]:
         """Get the dependencies of the target."""
-        return [
-            cast(PBXTargetDependency, self.objects()[dependency_id])
-            for dependency_id in self.dependency_ids
-        ]
+        return [cast(PBXTargetDependency, self.objects()[dependency_id]) for dependency_id in self.dependency_ids]
 
 
 @deserialize.downcast_identifier(PBXObject, "PBXAggregateTarget")
@@ -102,7 +99,4 @@ class PBXNativeTarget(PBXTarget):
         if self.build_rule_ids is None:
             return []
 
-        return [
-            cast(PBXBuildRule, self.objects()[build_rule_id])
-            for build_rule_id in self.build_rule_ids
-        ]
+        return [cast(PBXBuildRule, self.objects()[build_rule_id]) for build_rule_id in self.build_rule_ids]

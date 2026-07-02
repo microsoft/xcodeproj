@@ -1,13 +1,11 @@
 """PBX path objects"""
 
 import os
-from typing import cast, Optional
+from typing import Optional, cast
 
 import deserialize
 
 from .pbxobject import PBXObject
-
-# pylint: disable=no-member
 
 
 @deserialize.key("source_tree", "sourceTree")
@@ -31,13 +29,10 @@ class PBXPathObject(PBXObject):
         :returns: The parent group if found, None otherwise
         """
 
-        if (
-            hasattr(self, "_parent_group_reference")
-            and getattr(self, "_parent_group_reference") is not None
-        ):
+        if hasattr(self, "_parent_group_reference") and self._parent_group_reference is not None:
             return cast(
                 PBXGroup,
-                self.project().objects[getattr(self, "_parent_group_reference")],
+                self.project().objects[self._parent_group_reference],
             )
 
         group_types_to_check: list[type] = [
@@ -49,7 +44,7 @@ class PBXPathObject(PBXObject):
         for group_type in group_types_to_check:
             for group in self.project().fetch_type(group_type).values():
                 if self in group.children:
-                    setattr(self, "_parent_group_reference", group.object_key)
+                    self._parent_group_reference = group.object_key
                     return group
 
         return None
@@ -67,18 +62,16 @@ class PBXPathObject(PBXObject):
         :returns: The path if found, None otherwise
         """
 
-        # pylint: disable=too-many-return-statements,too-many-branches
-
         if hasattr(self, "_relative_path") and self._relative_path is not None:
             return self._relative_path
 
         if self.source_tree == "SOURCE_ROOT":
-            setattr(self, "_relative_path", self.path)
+            self._relative_path = self.path
             return cast(str, self.path)
 
         if self.source_tree == "<absolute>":
             if self.path and not self.path.startswith(os.sep):
-                setattr(self, "_relative_path", self.path)
+                self._relative_path = self.path
             return self.path
 
         if self.source_tree != "<group>":
@@ -109,9 +102,12 @@ class PBXPathObject(PBXObject):
                 child_path_includes_virtual_parent_name = False
 
                 # Check if the child's path includes the parent's name
-                if parent.name and self.path:
-                    if self.path == parent.name or self.path.startswith(parent.name + os.sep):
-                        child_path_includes_virtual_parent_name = True
+                if (
+                    parent.name
+                    and self.path
+                    and (self.path == parent.name or self.path.startswith(parent.name + os.sep))
+                ):
+                    child_path_includes_virtual_parent_name = True
 
                 # If the child's path includes the parent's name, we need to determine
                 # the base path for this child.
@@ -133,11 +129,7 @@ class PBXPathObject(PBXObject):
         # Determine the path segment contributed by this object itself
         if isinstance(self, PBXGroup):
             # For a group, if it's the main group and has no path/name, it contributes nothing.
-            if (
-                self.project().project.main_group_id == self.object_key
-                and not self.path
-                and not self.name
-            ):
+            if self.project().project.main_group_id == self.object_key and not self.path and not self.name:
                 current_segment_from_self = None
             else:
                 current_segment_from_self = self.path
@@ -146,17 +138,15 @@ class PBXPathObject(PBXObject):
 
         if current_segment_from_self is None:
             calculated_path = base_path_for_self
+        elif base_path_for_self == "" and current_segment_from_self.startswith(os.sep):
+            # Avoid os.path.join("", "/abs/path") becoming "//abs/path"
+            calculated_path = current_segment_from_self
         else:
-            if base_path_for_self == "" and current_segment_from_self.startswith(os.sep):
-                # Avoid os.path.join("", "/abs/path") becoming "//abs/path"
-                calculated_path = current_segment_from_self
-            else:
-                assert base_path_for_self is not None
-                calculated_path = os.path.join(base_path_for_self, current_segment_from_self)
+            assert base_path_for_self is not None
+            calculated_path = os.path.join(base_path_for_self, current_segment_from_self)
 
-        setattr(self, "_relative_path", calculated_path)
+        self._relative_path = calculated_path
         return calculated_path
-        # pylint: enable=too-many-return-statements,too-many-branches
 
     def absolute_path(self) -> str | None:
         """Find the absolute path

@@ -1,10 +1,7 @@
 #!/bin/bash
 
-pushd "${VIRTUAL_ENV}/.." > /dev/null
+set -e
 
-python3 -m black -l 100 xcodeproj/*.py tests/*.py
-python3 -m pylint --rcfile=pylintrc xcodeproj tests
-python3 -m mypy --ignore-missing-imports xcodeproj/ tests/
-
-popd > /dev/null
-
+poetry run ruff check xcodeproj tests
+poetry run ruff format --check xcodeproj tests
+poetry run mypy xcodeproj/ tests/

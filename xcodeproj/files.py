@@ -4,8 +4,8 @@ from typing import Any, cast
 
 import deserialize
 
-from .pbxobject import PBXObject
 from .pathobjects import PBXFileReference
+from .pbxobject import PBXObject
 
 
 @deserialize.key("file_ref_id", "fileRef")

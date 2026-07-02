@@ -1,6 +1,10 @@
 """Objects custom type for type hinting."""
 
-from typing import MutableMapping
+from collections.abc import MutableMapping
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .pbxobject import PBXObject
 
 
 class Objects(dict[str, "PBXObject"], MutableMapping[str, "PBXObject"]):  # type: ignore
