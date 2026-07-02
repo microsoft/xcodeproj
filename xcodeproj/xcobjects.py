@@ -1,6 +1,6 @@
 """PBX object types"""
 
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 import deserialize
 
@@ -22,7 +22,7 @@ class XCBuildConfiguration(PBXObject):
     name: str
 
     @property
-    def base_configuration(self) -> Optional["XCBuildConfiguration"]:
+    def base_configuration(self) -> "XCBuildConfiguration | None":
         """Get the base configuration for this build configureation.
 
         :returns: The base configuration

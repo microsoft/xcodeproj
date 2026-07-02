@@ -30,11 +30,11 @@ jobs:
 
       - name: Lint
         run: |
-          uv run ruff check xcodeproj tests
-          uv run ruff format --check xcodeproj tests
+          uv run ruff check xcodeproj tests scripts
+          uv run ruff format --check xcodeproj tests scripts
 
       - name: Type Check
-        run: uv run mypy xcodeproj/ tests/
+        run: uv run mypy xcodeproj/ tests/ scripts/
 
       - name: Test
         run: uv run pytest tests --cov=xcodeproj --cov-report xml --doctest-modules --junitxml=junit/test-results.xml

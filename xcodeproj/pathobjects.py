@@ -1,7 +1,7 @@
 """PBX path objects"""
 
 import os
-from typing import Optional, cast
+from typing import cast
 
 import deserialize
 
@@ -20,7 +20,7 @@ class PBXPathObject(PBXObject):
     _parent_group_reference: str | None
     _relative_path: str | None
 
-    def parent_group(self) -> Optional["PBXGroup"]:
+    def parent_group(self) -> "PBXGroup | None":
         """Find the parent group of a reference.
 
         If a reference happens to be in multiple groups, only the first found

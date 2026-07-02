@@ -11,6 +11,8 @@ import os
 import pathlib
 import subprocess
 import weakref
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as _version
 from typing import (
     Any,
     TypeVar,
@@ -52,6 +54,11 @@ from .schemes import Scheme
 from .targets import PBXAggregateTarget, PBXNativeTarget, PBXProductType, PBXTarget
 from .xcobjects import XCBuildConfiguration, XCConfigurationList
 
+try:
+    __version__ = _version("xcodeproj")
+except PackageNotFoundError:  # pragma: no cover
+    __version__ = "0.0.0"
+
 __all__ = [
     "Objects",
     "PBXAggregateTarget",
@@ -84,6 +91,7 @@ __all__ = [
     "XCConfigurationList",
     "XCVersionGroup",
     "XcodeProject",
+    "__version__",
 ]
 
 PBXObjectType = TypeVar("PBXObjectType", bound=PBXObject)

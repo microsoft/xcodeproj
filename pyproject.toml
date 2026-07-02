@@ -56,11 +56,21 @@ ignore = [
 "tests/*" = ["B017"] # pytest.raises(Exception) is acceptable in tests
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.10"
 
 [[tool.mypy.overrides]]
 module = ["deserialize"]
 ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--doctest-modules"
+
+[tool.coverage.run]
+source = ["xcodeproj"]
+
+[tool.coverage.report]
+show_missing = true
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]

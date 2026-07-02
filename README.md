@@ -1,5 +1,9 @@
 # xcodeproj
 
+[![PyPI version](https://img.shields.io/pypi/v/xcodeproj.svg)](https://pypi.org/project/xcodeproj/)
+[![Python versions](https://img.shields.io/pypi/pyversions/xcodeproj.svg)](https://pypi.org/project/xcodeproj/)
+[![Test](https://github.com/microsoft/xcodeproj/actions/workflows/test.yml/badge.svg)](https://github.com/microsoft/xcodeproj/actions/workflows/test.yml)
+
 `xcodeproj` is a utility for interacting with Xcode's xcodeproj bundle format.
 
 It expects some level of understanding of the internals of the pbxproj format and schemes. Note that this tool only reads projects. It does not write out any changes. If you are looking for more advanced functionality like this, I recommend looking at the Ruby gem of the same name (which is unaffiliated in anyway).
@@ -54,7 +58,28 @@ There's no DTD for xcscheme files, so the implementation has been guessed. There
 
 ## Contributing
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
+### Development
+
+This project uses [uv](https://docs.astral.sh/uv/) for dependency management and
+[Ruff](https://docs.astral.sh/ruff/) for linting and formatting.
+
+```bash
+# Install dependencies (creates a virtual environment)
+uv sync
+
+# Install the git pre-commit hooks
+uv run pre-commit install
+
+# Run the linters, formatter check, and type checker
+./stylecheck.sh
+
+# Run the tests
+./test.sh
+```
+
+### Contributor License Agreement
+
+This project welcomes contributions and suggestions. Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
 the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
 
