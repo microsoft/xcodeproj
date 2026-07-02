@@ -163,7 +163,8 @@ class XcodeProject:
 
         try:
             project_hash = hashlib.md5(
-                pathlib.Path(os.path.join(project_path, "project.pbxproj")).read_bytes()
+                pathlib.Path(os.path.join(project_path, "project.pbxproj")).read_bytes(),
+                usedforsecurity=False,
             ).hexdigest()
 
             with open(os.path.join(cache_folder, f"{project_hash}.dat"), "rb") as cached_file:
@@ -184,7 +185,9 @@ class XcodeProject:
         cache_folder = platformdirs.user_cache_dir("xcodeproj")
         os.makedirs(cache_folder, exist_ok=True)
 
-        project_hash = hashlib.md5(pathlib.Path(os.path.join(self.path, "project.pbxproj")).read_bytes()).hexdigest()
+        project_hash = hashlib.md5(
+            pathlib.Path(os.path.join(self.path, "project.pbxproj")).read_bytes(), usedforsecurity=False
+        ).hexdigest()
 
         with open(os.path.join(cache_folder, f"{project_hash}.dat"), "wb") as cached_file:
             pickle.dump(self, cached_file)

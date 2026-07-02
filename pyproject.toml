@@ -30,6 +30,7 @@ repository = "https://github.com/Microsoft/xcodeproj"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.19.1"
+pre-commit = "^4.0.0"
 pytest = "^9.0.2"
 pytest-cov = "^7.0.0"
 requests = "^2.33.0"

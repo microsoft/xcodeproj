@@ -2,7 +2,7 @@
 
 `xcodeproj` is a utility for interacting with Xcode's xcodeproj bundle format.
 
-It expects some level of understanding of the internals of the pbxproj format and schemes. Note that this tool only reads projects. It does not write out any changes. If you are looking for more advanced functionality like this, I recommend looking at the Ruby gem of the same name (which is unaffiliated in anyway). 
+It expects some level of understanding of the internals of the pbxproj format and schemes. Note that this tool only reads projects. It does not write out any changes. If you are looking for more advanced functionality like this, I recommend looking at the Ruby gem of the same name (which is unaffiliated in anyway).
 
 To learn more about the format, you can look at any of these locations:
 
@@ -25,7 +25,7 @@ From here you can explore the project in different ways:
 for target in project.targets:
     print(target.name)
 
-# Print from the root level, 2 levels deep (.project is a property on the root 
+# Print from the root level, 2 levels deep (.project is a property on the root
 # project as other properties such as .schemes are also available)
 for item1 in project.project.main_group.children:
     print(item1)
@@ -42,7 +42,7 @@ for item in project.fetch_type(xcodeproj.PBXFileReference).values():
 # You can access the raw objects map directly:
 obj = project.objects["key here"]
 
-# For any object you have, you can access its key/identifier via the 
+# For any object you have, you can access its key/identifier via the
 # `.object_key` property
 key = obj.object_key
 ```
@@ -68,8 +68,8 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 
 ## Trademarks
 
-This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft 
-trademarks or logos is subject to and must follow 
+This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft
+trademarks or logos is subject to and must follow
 [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
 Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
 Any use of third-party trademarks or logos are subject to those third-party's policies.
