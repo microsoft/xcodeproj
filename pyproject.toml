@@ -28,14 +28,16 @@ dependencies = [
 homepage = "https://github.com/Microsoft/xcodeproj"
 repository = "https://github.com/Microsoft/xcodeproj"
 
-[tool.poetry.group.dev.dependencies]
-mypy = "^1.19.1"
-pre-commit = "^4.0.0"
-pytest = "^9.0.2"
-pytest-cov = "^7.0.0"
-requests = "^2.33.0"
-ruff = "^0.15.20"
-types-requests = "^2.32.4"
+[dependency-groups]
+dev = [
+    "mypy>=1.19.1",
+    "pre-commit>=4.0.0",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "requests>=2.33.0",
+    "ruff>=0.15.20",
+    "types-requests>=2.32.4",
+]
 
 [tool.ruff]
 line-length = 120
@@ -62,5 +64,5 @@ module = ["deserialize"]
 ignore_missing_imports = true
 
 [build-system]
-requires = ["poetry-core>=2.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"

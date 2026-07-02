@@ -19,27 +19,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8
         with:
+          enable-cache: true
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Poetry
-        run: pipx install poetry
-
       - name: Install dependencies
-        run: poetry install
+        run: uv sync
 
       - name: Lint
         run: |
-          poetry run ruff check xcodeproj tests
-          poetry run ruff format --check xcodeproj tests
+          uv run ruff check xcodeproj tests
+          uv run ruff format --check xcodeproj tests
 
       - name: Type Check
-        run: poetry run mypy xcodeproj/ tests/
+        run: uv run mypy xcodeproj/ tests/
 
       - name: Test
-        run: poetry run pytest tests --cov=xcodeproj --cov-report xml --doctest-modules --junitxml=junit/test-results.xml
+        run: uv run pytest tests --cov=xcodeproj --cov-report xml --doctest-modules --junitxml=junit/test-results.xml
 
       - name: Upload coverage report
         if: always()

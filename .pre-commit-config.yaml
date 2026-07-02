@@ -20,7 +20,7 @@ repos:
     hooks:
       - id: mypy
         name: mypy
-        entry: poetry run mypy xcodeproj/ tests/
+        entry: uv run mypy xcodeproj/ tests/
         language: system
         types: [python]
         pass_filenames: false
