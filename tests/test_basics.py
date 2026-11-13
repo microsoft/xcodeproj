@@ -43,6 +43,16 @@ def synchronized() -> xcodeproj.XcodeProject:
     return xcodeproj.XcodeProject(path)
 
 
+@pytest.fixture(scope="session")
+def package_product_dependency() -> xcodeproj.XcodeProject:
+    """Load a project with a target that depends directly on a package product.
+
+    :returns: The project
+    """
+    path = os.path.join(COLLATERAL_PATH, "PackageProductDependency", "PackageProductDependency.xcodeproj")
+    return xcodeproj.XcodeProject(path)
+
+
 def test_base_references(one: xcodeproj.XcodeProject) -> None:
     """Test that references work
 
@@ -430,3 +440,24 @@ def test_target_file_system_synchronized_groups(
     targets = synchronized.project.targets
     assert len(targets) == 1
     assert targets[0].file_system_synchronized_group_ids == [group.object_key]
+
+
+def test_package_product_dependency(package_product_dependency: xcodeproj.XcodeProject) -> None:
+    """Xcode emits a PBXTargetDependency with only productRef (no target or
+    targetProxy) when a target depends directly on a Swift package product,
+    so both target and target_proxy must be optional and productRef must be
+    modeled.
+
+    :param package_product_dependency: The project with a direct package
+        product dependency
+    """
+    targets = package_product_dependency.project.targets
+    assert len(targets) == 1
+
+    dependencies = package_product_dependency.fetch_type(xcodeproj.PBXTargetDependency)
+    assert len(dependencies) == 1
+
+    dependency = list(dependencies.values())[0]
+    assert dependency.target is None
+    assert dependency.target_proxy is None
+    assert dependency.product_ref == "A1F00B3B9F87D95AB5146C6A"

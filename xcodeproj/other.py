@@ -16,7 +16,8 @@ class PBXTargetDependency(PBXObject):
     name: str | None
     platform_filter: str | None
     target: str | None
-    target_proxy: str
+    target_proxy: str | None
+    product_ref: str | None
 
 
 @deserialize.key("remote_global_id_string", "remoteGlobalIDString")

@@ -1,0 +1,155 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 60;
+	objects = {
+
+/* Begin PBXFileReference section */
+		E436B1AF21A1F0892508F713 /* libPackageProductDependency.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPackageProductDependency.a; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		D017C1C015CDE1BBF478579B = {
+			isa = PBXGroup;
+			children = (
+				B351C11AFDC3BBB11182EC0C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B351C11AFDC3BBB11182EC0C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E436B1AF21A1F0892508F713 /* libPackageProductDependency.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C47328DF1C2D7F1D634286E6 /* PackageProductDependency */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6FC5833F048DA463093BB507 /* Build configuration list for PBXNativeTarget "PackageProductDependency" */;
+			buildPhases = (
+				AE16F2EED1CE6BEDE8B771C4 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8C77210941C10F61C72C491D /* PBXTargetDependency */,
+			);
+			name = PackageProductDependency;
+			packageProductDependencies = (
+				A1F00B3B9F87D95AB5146C6A /* SomePackageProduct */,
+			);
+			productName = PackageProductDependency;
+			productReference = E436B1AF21A1F0892508F713 /* libPackageProductDependency.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9BAA95028C6FAEBD10DC2C3E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+			};
+			buildConfigurationList = C7622C5F86772F8F9A8B6659 /* Build configuration list for PBXProject "PackageProductDependency" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = D017C1C015CDE1BBF478579B;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 60;
+			productRefGroup = B351C11AFDC3BBB11182EC0C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C47328DF1C2D7F1D634286E6 /* PackageProductDependency */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AE16F2EED1CE6BEDE8B771C4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		8C77210941C10F61C72C491D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = A1F00B3B9F87D95AB5146C6A /* SomePackageProduct */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		F34DF771685F4C2457A76F96 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		504AD42E10041C9D8046D233 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		B5564F615B7327CB0084AF1E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+			};
+			name = Release;
+		};
+		14C0899D6013E6D703CFD49F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C7622C5F86772F8F9A8B6659 /* Build configuration list for PBXProject "PackageProductDependency" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F34DF771685F4C2457A76F96 /* Debug */,
+				B5564F615B7327CB0084AF1E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6FC5833F048DA463093BB507 /* Build configuration list for PBXNativeTarget "PackageProductDependency" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				504AD42E10041C9D8046D233 /* Debug */,
+				14C0899D6013E6D703CFD49F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 9BAA95028C6FAEBD10DC2C3E /* Project object */;
+}
